@@ -1,5 +1,5 @@
 {
-  "faces": 8,
+  "faces": 9,
   "body": { "width": 2.02, "height": 2.08, "depth": 0.96, "radius": 0.11, "y": -0.02 },
   "arch": { "height": 0.72 },
   "plinth": { "width": 2.24, "height": 0.14, "depth": 1.16, "overlap": 0.02 },

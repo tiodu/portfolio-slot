@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { FACES } from "./rig";
+import { FACE_COUNT, reelSymbols, type ReelSymbol } from "./symbol-list";
 
 const CELL = 384;
 
@@ -76,6 +76,26 @@ function drawStar(ctx: CanvasRenderingContext2D) {
   ctx.fill();
 }
 
+function drawLetter(ctx: CanvasRenderingContext2D, symbol: ReelSymbol) {
+  const family = getComputedStyle(document.body).fontFamily;
+  ctx.font = `700 120px ${family}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineWidth = 14;
+  ctx.strokeStyle = "#f2c14e";
+  ctx.strokeText(symbol.label.slice(0, 1), 0, 6);
+  ctx.fillStyle = "#17171f";
+  ctx.fillText(symbol.label.slice(0, 1), 0, 6);
+}
+
+function drawSymbol(ctx: CanvasRenderingContext2D, symbol: ReelSymbol) {
+  if (symbol.mark === "cherry") drawCherry(ctx);
+  else if (symbol.mark === "seven") drawSeven(ctx);
+  else if (symbol.mark === "star") drawStar(ctx);
+  else if (symbol.mark === "bar") drawBar(ctx);
+  else drawLetter(ctx, symbol);
+}
+
 function roundRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -112,11 +132,9 @@ function starPath(
   ctx.closePath();
 }
 
-const drawers = [drawCherry, drawSeven, drawBar, drawStar];
-
 export function createSymbolTexture(anisotropy: number) {
   const canvas = document.createElement("canvas");
-  canvas.width = CELL * FACES;
+  canvas.width = CELL * FACE_COUNT;
   canvas.height = CELL;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not draw reel symbols");
@@ -124,14 +142,14 @@ export function createSymbolTexture(anisotropy: number) {
   ctx.fillStyle = "#fffdf8";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  for (let index = 0; index < FACES; index += 1) {
+  for (let index = 0; index < FACE_COUNT; index += 1) {
     ctx.save();
     ctx.translate(index * CELL + CELL / 2, CELL / 2);
-    // The strip runs around the reel. Flip local X so BAR reads left to right
-    // from the front of the cabinet.
+    // Rotate the cell onto the cylinder, then flip Y so BAR stays upright.
+    // A negative X scale keeps the letters reading left to right.
     ctx.rotate(-Math.PI / 2);
-    ctx.scale(-CELL / 256, CELL / 256);
-    drawers[index % drawers.length](ctx);
+    ctx.scale(-CELL / 256, -CELL / 256);
+    drawSymbol(ctx, reelSymbols[index]);
     ctx.restore();
   }
 

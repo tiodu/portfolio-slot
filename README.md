@@ -2,7 +2,7 @@
 
 Portfolio of Eduardo de Souza, Product Design Manager. This repository is the rebuild. The live site at eduardodesouza.me stays as it is until he explicitly says otherwise.
 
-The homepage hero is a three-reel cabinet. A still of that cabinet stands in while the scene loads, and it stays in place when WebGL is unavailable or motion is reduced. The five case studies remain a plain list underneath. There is no CMS, backend, or analytics.
+The homepage hero is a three-reel cabinet. A still of that cabinet stands in while the scene loads, and it stays in place when WebGL is unavailable. Reduced motion keeps the cabinet and snaps the reels to the result. The five case studies remain a plain list underneath. There is no CMS, backend, or analytics.
 
 ## Run it
 

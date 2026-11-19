@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { createReelGeometry } from "@/lib/cabinet/geometry";
 import { surface } from "@/lib/cabinet/materials";
 import { reel, reelX } from "@/lib/cabinet/metrics";
-import { REEL_OFFSET } from "@/lib/cabinet/rig";
+import { REEL_OFFSET } from "@/lib/cabinet/machine";
 import { createSymbolTexture } from "@/lib/cabinet/symbols";
 import { useRig } from "./world";
 

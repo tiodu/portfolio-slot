@@ -187,13 +187,112 @@ a {
   opacity: 1;
 }
 
-.cabinet-scene:focus {
-  outline: none;
+.lever-trigger {
+  position: absolute;
+  z-index: 2;
+  right: 1%;
+  top: 47%;
+  width: 22%;
+  height: 38%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  cursor: grab;
+  touch-action: none;
 }
 
-.cabinet-scene:focus-visible {
+.lever-trigger:active {
+  cursor: grabbing;
+}
+
+.lever-trigger[aria-disabled="true"] {
+  cursor: default;
+}
+
+.lever-trigger:focus {
   outline: 2px solid var(--color-focus);
-  outline-offset: -3px;
+  outline-offset: -6px;
+}
+
+.spin-result {
+  position: absolute;
+  z-index: 3;
+  left: 8%;
+  right: 24%;
+  bottom: 5%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 32%;
+  padding: var(--space-3);
+  overflow: auto;
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+}
+
+.spin-result:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.spin-result-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+.spin-result p {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.spin-result p:not(.spin-result-title) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.spin-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.spin-result a,
+.spin-result button {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.spin-result a {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--color-text-muted);
+}
+
+.spin-result a:hover,
+.spin-result a:focus-visible {
+  text-decoration-color: var(--color-text);
+}
+
+.spin-result button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
 }
 
 .cabinet-scene canvas {
