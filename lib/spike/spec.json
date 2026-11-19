@@ -1,0 +1,31 @@
+{
+  "faces": 8,
+  "body": { "width": 2.02, "height": 2.08, "depth": 0.96, "radius": 0.09, "y": -0.02 },
+  "arch": { "height": 0.72 },
+  "plinth": { "width": 2.2, "height": 0.14, "depth": 1.12, "overlap": 0.02 },
+  "reel": { "radius": 0.58, "width": 0.42, "gap": 0.075, "y": 0.08, "z": 0.1 },
+  "window": {
+    "innerWidth": 1.5,
+    "innerHeight": 0.56,
+    "bar": 0.08,
+    "y": 0.08,
+    "z": 0.6,
+    "depth": 0.07
+  },
+  "drawer": { "width": 1.5, "height": 0.2, "depth": 0.56, "yOffset": 0.24, "z": 0.26 },
+  "bulbs": { "count": 24, "radius": 0.045 },
+  "lever": { "arm": 1.02, "knob": 0.115, "rest": -0.42, "pulled": -1.05 },
+  "colors": {
+    "red": "#7c1628",
+    "redDeep": "#4a0d16",
+    "knob": "#e1062a",
+    "chrome": "#e7eef3",
+    "drawer": "#d5dbe1",
+    "window": "#12080b",
+    "reel": "#fbf8f2",
+    "vegas": "#07060e",
+    "bulbHot": "#fff1cc",
+    "bulbMid": "#ff9a3c",
+    "bulbDim": "#3a2416"
+  }
+}
