@@ -1,11 +1,11 @@
 import { CaseStudyList } from "@/components/case-study-list";
-import { HeroPlaceholder } from "@/components/hero-placeholder";
+import { CabinetHero } from "@/components/cabinet/hero";
 import { caseStudies } from "@/lib/case-studies";
 
 export default function HomePage() {
   return (
     <>
-      <HeroPlaceholder />
+      <CabinetHero />
       <CaseStudyList studies={caseStudies} />
     </>
   );
