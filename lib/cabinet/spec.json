@@ -1,0 +1,33 @@
+{
+  "faces": 8,
+  "body": { "width": 2.02, "height": 2.08, "depth": 0.96, "radius": 0.11, "y": -0.02 },
+  "arch": { "height": 0.72 },
+  "plinth": { "width": 2.24, "height": 0.14, "depth": 1.16, "overlap": 0.02 },
+  "reel": { "radius": 0.58, "width": 0.42, "gap": 0.075, "y": 0.12, "z": 0.1 },
+  "window": {
+    "innerWidth": 1.46,
+    "innerHeight": 0.54,
+    "bar": 0.07,
+    "y": 0.14,
+    "z": 0.62,
+    "depth": 0.07
+  },
+  "drawer": { "width": 1.36, "height": 0.12, "depth": 0.16, "yOffset": 0.18, "z": 0.5 },
+  "bulbs": { "count": 24, "radius": 0.038 },
+  "lever": { "arm": 1.02, "knob": 0.115, "rest": -0.42, "pulled": -1.05 },
+  "colors": {
+    "cream": "#f3e4c8",
+    "turquoise": "#12b7b0",
+    "turquoiseDeep": "#0c8f8a",
+    "jewel": "#3ef0e6",
+    "knob": "#e1062a",
+    "chrome": "#f2f5f8",
+    "window": "#14120f",
+    "reel": "#fbf8f2",
+    "background": "#0e0d0b",
+    "bulbHot": "#fff6e0",
+    "bulbRest": "#e07028",
+    "neonPink": "#ff4d94",
+    "neonCyan": "#5cefff"
+  }
+}
