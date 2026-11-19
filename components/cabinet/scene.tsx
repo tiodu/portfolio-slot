@@ -48,7 +48,8 @@ export function CabinetScene({
   const gl = useMemo(
     () => ({
       antialias: !compact,
-      alpha: false,
+      alpha: true,
+      premultipliedAlpha: true,
       powerPreference: "high-performance" as const,
       stencil: false,
       preserveDrawingBuffer: capture,
@@ -66,8 +67,10 @@ export function CabinetScene({
       frameloop={reduced ? "demand" : "always"}
       gl={gl}
       tabIndex={-1}
-      camera={{ fov: 30, near: 0.1, far: 40, position: [2.55, 0.42, 7.6] }}
+      camera={{ fov: 30, near: 0.1, far: 40, position: [1.45, 0.55, 7.2] }}
+      style={{ background: "transparent" }}
       onCreated={({ gl: renderer }) => {
+        renderer.setClearColor(0x000000, 0);
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.02;
       }}

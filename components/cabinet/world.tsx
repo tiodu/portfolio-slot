@@ -15,7 +15,7 @@ import {
 } from "react";
 import * as THREE from "three";
 import { onSpinRequested, setPhase } from "@/lib/cabinet/bus";
-import { colors, frame, plinth } from "@/lib/cabinet/metrics";
+import { frame, plinth } from "@/lib/cabinet/metrics";
 import {
   beginSpin,
   createRig,
@@ -30,13 +30,6 @@ export function useRig() {
   const rig = use(RigContext);
   if (!rig) throw new Error("Cabinet rig is missing");
   return rig;
-}
-
-function readBackground() {
-  const token = getComputedStyle(document.documentElement)
-    .getPropertyValue("--color-bg")
-    .trim();
-  return token || colors.background;
 }
 
 function RigDriver({ reduced }: { reduced: boolean }) {
@@ -99,12 +92,10 @@ function Stage({ children }: { children: ReactNode }) {
   const shadow = useMemo(() => createShadowTexture(), []);
 
   useLayoutEffect(() => {
-    const background = new THREE.Color(readBackground());
-    // The scene background is a Three.js property, not React state.
+    // Keep the canvas clear so the street image shows through the scene.
     // eslint-disable-next-line react-hooks/immutability
-    scene.background = background;
+    scene.background = null;
     return () => {
-      scene.background = null;
       shadow.dispose();
     };
   }, [scene, shadow]);

@@ -127,8 +127,8 @@ export function createSymbolTexture(anisotropy: number) {
   for (let index = 0; index < FACES; index += 1) {
     ctx.save();
     ctx.translate(index * CELL + CELL / 2, CELL / 2);
-    // The strip runs around the reel. Local X is the reading direction, and
-    // the cylinder's UV mirrors it, so flip X and BAR stays left to right.
+    // The strip runs around the reel. Flip local X so BAR reads left to right
+    // from the front of the cabinet.
     ctx.rotate(-Math.PI / 2);
     ctx.scale(-CELL / 256, CELL / 256);
     drawers[index % drawers.length](ctx);

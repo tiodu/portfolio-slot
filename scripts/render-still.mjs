@@ -63,8 +63,9 @@ try {
       const canvas = document.createElement("canvas");
       canvas.width = Math.max(1, Math.round(source.width * scale));
       canvas.height = Math.max(1, Math.round(source.height * scale));
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { alpha: true });
       if (!ctx) return "";
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
       return canvas.toDataURL("image/webp", quality);
     }, attempt);

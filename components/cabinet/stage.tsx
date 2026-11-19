@@ -108,8 +108,8 @@ export function CabinetStage() {
         className="cabinet-still"
         src="/cabinet-still.webp"
         alt="A cream and turquoise Googie slot cabinet with a starburst sign reading Eduardo de Souza, three reels, and a lever."
-        width={728}
-        height={1092}
+        width={807}
+        height={1210}
         decoding="async"
         fetchPriority="high"
         aria-hidden={live ? true : undefined}

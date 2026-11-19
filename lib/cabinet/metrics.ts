@@ -58,11 +58,11 @@ export const lever = {
 export const colors = spec.colors;
 
 export const frame = {
-  height: 4.55,
-  width: 4.05,
+  height: 3.75,
+  width: 2.95,
   fov: 30,
-  targetY: 0.42,
-  yaw: 2.55,
+  targetY: 0.55,
+  yaw: 1.45,
 };
 
 export function bulbLayout() {
