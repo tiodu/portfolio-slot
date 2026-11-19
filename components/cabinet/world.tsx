@@ -14,17 +14,28 @@ import {
   type RefObject,
 } from "react";
 import * as THREE from "three";
-import { onSpinRequested, setPhase } from "@/lib/cabinet/bus";
-import { frame, plinth } from "@/lib/cabinet/metrics";
 import {
-  beginSpin,
-  createRig,
-  stepRig,
-  type Rig,
-} from "@/lib/cabinet/rig";
+  clearResult,
+  onDismissRequested,
+  onSpinRequested,
+  publishResult,
+  readLeverDrag,
+  setAnnouncement,
+  setPhase,
+} from "@/lib/cabinet/bus";
+import {
+  createMachine,
+  dismiss,
+  dragLever,
+  pull,
+  tick,
+  type Machine,
+} from "@/lib/cabinet/machine";
+import { frame, plinth } from "@/lib/cabinet/metrics";
+import { pickOutcome } from "@/lib/cabinet/outcome";
 import { createShadowTexture } from "@/lib/cabinet/symbols";
 
-const RigContext = createContext<RefObject<Rig> | null>(null);
+const RigContext = createContext<RefObject<Machine> | null>(null);
 
 export function useRig() {
   const rig = use(RigContext);
@@ -43,21 +54,51 @@ function RigDriver({ reduced }: { reduced: boolean }) {
 
   useEffect(() => {
     return onSpinRequested(() => {
-      const started = beginSpin(rig.current, performance.now(), reducedRef.current);
+      const now = performance.now() / 1000;
+      const outcome = pickOutcome();
+      const started = pull(rig.current, now, outcome, reducedRef.current);
       if (!started) return;
-      setPhase(rig.current.phase);
+      if (rig.current.phase === "landed") publishResult(outcome);
+      else {
+        setAnnouncement("Reels spinning.");
+        setPhase(rig.current.phase);
+      }
       invalidate();
     });
   }, [invalidate, rig]);
 
   useEffect(() => {
-    return () => setPhase("idle");
+    return onDismissRequested(() => {
+      if (!dismiss(rig.current)) return;
+      clearResult();
+      invalidate();
+    });
+  }, [invalidate, rig]);
+
+  useEffect(() => {
+    return () => {
+      setPhase("idle");
+      clearResult();
+    };
   }, []);
 
   useFrame((_, delta) => {
+    const now = performance.now() / 1000;
+    const drag = readLeverDrag();
+    if (drag === null) {
+      if (rig.current.leverDragging) dragLever(rig.current, null);
+    } else {
+      dragLever(rig.current, drag);
+    }
     const previous = rig.current.phase;
-    const moving = stepRig(rig.current, performance.now(), reducedRef.current, delta);
-    if (rig.current.phase !== previous) setPhase(rig.current.phase);
+    const moving = tick(rig.current, now, delta, reducedRef.current);
+    if (rig.current.phase !== previous) {
+      if (rig.current.phase === "landed" && rig.current.outcome) {
+        publishResult(rig.current.outcome);
+      } else {
+        setPhase(rig.current.phase);
+      }
+    }
     if (moving) invalidate();
   });
 
@@ -163,7 +204,7 @@ export function CabinetWorld({
   readyToShow: boolean;
   onReady: () => void;
 }) {
-  const rig = useRef(createRig());
+  const rig = useRef(createMachine());
   const key = useRef<THREE.DirectionalLight>(null);
   const lights = useMemo(() => [key], []);
 
