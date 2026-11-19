@@ -1,0 +1,72 @@
+/*
+  Design tokens: one set of names for colour, type, spacing, radius, and motion.
+  The rest of the CSS uses these names only. Reduced motion sets durations to
+  zero, so transitions stop and the layout stays put.
+*/
+
+:root {
+  /* Colour. Dark and warm, ready to sit under a neon night later. */
+  --color-bg: #0e0d0b;
+  --color-bg-raised: #171512;
+  --color-bg-glow: #241f18;
+  --color-text: #f4f0e6;
+  --color-text-muted: #b0aa9e;
+  --color-line: #2c2923;
+  --color-focus: #e4c56d;
+
+  /* Type. */
+  --font-sans: var(--font-outfit), "Segoe UI", sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem);
+  --leading-tight: 1.15;
+  --leading-snug: 1.4;
+  --leading-body: 1.6;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.14em;
+
+  /* Spacing. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+
+  /* Radius. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1.25rem;
+
+  /* Motion. */
+  --duration-fast: 140ms;
+  --duration-base: 240ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout. */
+  --page-width: 40rem;
+  --page-gutter: var(--space-5);
+  /* Portrait frame reserved for the future three-reel cabinet. */
+  --cabinet-width: 26rem;
+  --cabinet-ratio: 2 / 3;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --page-gutter: var(--space-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --ease-out: linear;
+  }
+}
