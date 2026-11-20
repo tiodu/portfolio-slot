@@ -1,12 +1,11 @@
 import { CabinetStage } from "./stage";
+import { StripBackground } from "./strip-bg";
 
 export function CabinetHero() {
   return (
     <section className="hero" aria-label="Hero">
       <div className="hero-street" aria-hidden="true">
-        {/* Static plate for the later background shader. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/strip-bg.webp" alt="" />
+        <StripBackground />
         <div className="hero-street-fade" />
       </div>
       <div className="hero-stage">

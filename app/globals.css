@@ -129,11 +129,21 @@ a {
   overflow: hidden;
 }
 
-.hero-street img {
+.hero-street-fallback,
+.hero-street-canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.hero-street-fallback {
   object-fit: cover;
   object-position: center center;
+}
+
+.hero-street-canvas {
+  display: block;
 }
 
 .hero-street-fade {
@@ -141,6 +151,7 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 1;
   height: 38%;
   background: linear-gradient(to bottom, transparent, var(--color-bg));
 }
