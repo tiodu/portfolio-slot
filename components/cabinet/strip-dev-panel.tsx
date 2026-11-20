@@ -2,6 +2,7 @@
 
 import { Leva, useControls } from "leva";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { stripDefaults, type StripControls } from "@/lib/cabinet/strip-shader";
 
 export function StripDevPanel({
@@ -35,5 +36,11 @@ export function StripDevPanel({
     onChange(controls);
   }, [controls, onChange]);
 
-  return <Leva collapsed titleBar={{ title: "Strip" }} />;
+  // Hero street uses pointer-events: none; portal so the panel can receive clicks.
+  return createPortal(
+    <div style={{ pointerEvents: "auto" }}>
+      <Leva titleBar={{ title: "Strip" }} />
+    </div>,
+    document.body,
+  );
 }
