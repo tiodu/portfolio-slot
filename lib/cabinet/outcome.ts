@@ -1,4 +1,4 @@
-import { getCaseStudy } from "../case-studies";
+import { getCaseStudy } from "../../content/case-studies";
 import { reelSymbols, type ReelSymbol } from "./symbol-list";
 
 export type Faces = [number, number, number];

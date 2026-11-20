@@ -460,3 +460,312 @@ a {
   color: var(--color-text);
   text-decoration-color: var(--color-text);
 }
+
+/* Case studies. Cream type on the same ground as the rest of the site.
+   The strip and the cabinet stay on the home page. */
+
+.study {
+  overflow-x: clip;
+}
+
+.study-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.study-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-3);
+}
+
+.study-bar a {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out),
+    text-decoration-color var(--duration-fast) var(--ease-out);
+}
+
+.study-bar a:hover,
+.study-bar a:focus-visible {
+  color: var(--color-text);
+  text-decoration-color: var(--color-text);
+}
+
+.study-bar nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.study-body {
+  padding-bottom: var(--space-6);
+}
+
+.study-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-5);
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.study-title {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+.study-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-3);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.study-meta div {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.study-meta dt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.study-meta dt::after {
+  content: ":";
+}
+
+.study-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 100%;
+  margin-top: var(--space-5);
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+}
+
+.study-strip > li {
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.study-tile {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--color-bg-glow), var(--color-bg-raised));
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.study-strip figcaption {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.study-strip figcaption.todo {
+  margin-top: var(--space-2);
+}
+
+.study-section {
+  margin-top: var(--space-7);
+  scroll-margin-top: 5.5rem;
+}
+
+.study-section h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+.study-section > * + * {
+  margin-top: var(--space-4);
+}
+
+.study-section h3 {
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+}
+
+.study-section p,
+.study-section li {
+  max-width: 38rem;
+}
+
+.study-section ul {
+  padding-left: 1.1rem;
+}
+
+.study-section li + li {
+  margin-top: var(--space-2);
+}
+
+.study-section a {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--color-text-muted);
+  transition: text-decoration-color var(--duration-fast) var(--ease-out);
+}
+
+.study-section a:hover,
+.study-section a:focus-visible {
+  text-decoration-color: var(--color-text);
+}
+
+.study-section .study-pairs {
+  padding-left: 0;
+  list-style: none;
+}
+
+.study-pairs > li + li {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+}
+
+.study-pairs p + p {
+  margin-top: var(--space-3);
+}
+
+.study-pair-label {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.study-section .todo {
+  margin-top: var(--space-4);
+}
+
+.study-reels {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line);
+}
+
+.study-reel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 16rem;
+  text-decoration: none;
+}
+
+.study-reel-next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.study-reel-label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out),
+    text-decoration-color var(--duration-fast) var(--ease-out);
+}
+
+.study-reel:hover .study-reel-label,
+.study-reel:focus-visible .study-reel-label {
+  color: var(--color-text);
+  text-decoration-color: var(--color-text);
+}
+
+.study-reel-title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  text-wrap: balance;
+}
+
+@media (min-width: 48rem) {
+  .study-strip {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+}
+
+::view-transition-old(.study-fade) {
+  animation: study-fade-out var(--duration-fade) var(--ease-out) both;
+}
+
+::view-transition-new(.study-fade) {
+  animation: study-fade-in var(--duration-fade) var(--ease-out) both;
+}
+
+@keyframes study-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes study-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
