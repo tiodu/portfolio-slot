@@ -50,3 +50,34 @@ export function supportedWebGL() {
   }
   return webglSupport;
 }
+
+type NavigatorHints = Navigator & {
+  deviceMemory?: number;
+  connection?: { saveData?: boolean };
+};
+
+let lowPower: boolean | null = null;
+
+/** Heuristic for devices that should keep the CSS street plate instead of the strip shader. */
+export function isLowPowerDevice() {
+  if (lowPower !== null) return lowPower;
+  try {
+    const nav = navigator as NavigatorHints;
+    if (nav.connection?.saveData) {
+      lowPower = true;
+      return lowPower;
+    }
+    if (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2) {
+      lowPower = true;
+      return lowPower;
+    }
+    if (nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 2) {
+      lowPower = true;
+      return lowPower;
+    }
+    lowPower = false;
+  } catch {
+    lowPower = false;
+  }
+  return lowPower;
+}
