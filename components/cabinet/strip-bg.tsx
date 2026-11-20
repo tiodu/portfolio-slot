@@ -94,6 +94,7 @@ function StripPlane({
       uHazeAmount: { value: controls.hazeAmount },
       uHazeSpeed: { value: controls.hazeSpeed },
       uSmearAmount: { value: controls.smearAmount },
+      uSmearPulseSpeed: { value: controls.smearPulseSpeed },
       uTint: { value: tint.clone() },
       uResolution: { value: new THREE.Vector2(size.width, size.height) },
       uImageSize: {
@@ -115,6 +116,7 @@ function StripPlane({
     material.uniforms.uHazeAmount.value = next.hazeAmount;
     material.uniforms.uHazeSpeed.value = next.hazeSpeed;
     material.uniforms.uSmearAmount.value = next.smearAmount;
+    material.uniforms.uSmearPulseSpeed.value = next.smearPulseSpeed;
     material.uniforms.uTint.value.copy(tint);
     material.uniforms.uResolution.value.set(size.width, size.height);
   });

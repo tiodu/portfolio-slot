@@ -5,13 +5,23 @@ export type StripControls = {
   hazeAmount: number;
   hazeSpeed: number;
   smearAmount: number;
+  smearPulseSpeed: number;
   tint: string;
 };
 
+/** Slider maxima used by the ?tune panel; defaults sit near 80% of haze ranges. */
+export const stripRanges = {
+  hazeAmount: { min: 0, max: 0.05, step: 0.001 },
+  hazeSpeed: { min: 0, max: 1, step: 0.01 },
+  smearAmount: { min: 0, max: 0.05, step: 0.001 },
+  smearPulseSpeed: { min: 0, max: 2, step: 0.01 },
+} as const;
+
 export const stripDefaults: StripControls = {
-  hazeAmount: 0.014,
-  hazeSpeed: 0.22,
+  hazeAmount: stripRanges.hazeAmount.max * 0.8,
+  hazeSpeed: stripRanges.hazeSpeed.max * 0.8,
   smearAmount: 0.01,
+  smearPulseSpeed: 0.6,
   tint: "#ffffff",
 };
 
@@ -32,6 +42,7 @@ uniform float uTime;
 uniform float uHazeAmount;
 uniform float uHazeSpeed;
 uniform float uSmearAmount;
+uniform float uSmearPulseSpeed;
 uniform vec3 uTint;
 uniform vec2 uResolution;
 uniform vec2 uImageSize;
@@ -66,18 +77,23 @@ vec2 coverUv(vec2 uv) {
 void main() {
   vec2 base = coverUv(vUv);
 
-  // Heat strongest on the road (lower half of the plate).
-  float heatMask = 1.0 - smoothstep(0.0, 0.58, vUv.y);
+  // Soften into the case-study fade band (bottom ~38% of the hero).
+  float listReadable = smoothstep(0.0, 0.38, vUv.y);
+
+  // Heat strongest on the road (lower half), but capped near the list.
+  float heatMask = (1.0 - smoothstep(0.0, 0.58, vUv.y)) * listReadable;
   vec2 noiseCoord = base * vec2(4.2, 2.6) + vec2(0.0, uTime * uHazeSpeed);
   float n1 = valueNoise(noiseCoord);
   float n2 = valueNoise(noiseCoord + vec2(19.2, 7.3));
   vec2 haze = vec2(n1 - 0.5, n2 - 0.5) * uHazeAmount * heatMask;
   vec2 distorted = clamp(base + haze, 0.0, 1.0);
 
-  // Chromatic smear grows toward the screen edges.
+  // Chromatic smear grows toward the edges and pulses with time.
+  // With reduced motion, uTime stays 0 so the pulse factor is a steady 0.5.
+  float pulse = 0.5 + 0.5 * sin(uTime * uSmearPulseSpeed);
   vec2 fromCenter = vUv - 0.5;
   float edge = length(fromCenter) * 2.0;
-  float smear = uSmearAmount * edge * edge;
+  float smear = uSmearAmount * pulse * edge * edge * listReadable;
   vec2 dir = length(fromCenter) > 1e-4 ? normalize(fromCenter) : vec2(0.0);
 
   float r = texture2D(uMap, clamp(distorted + dir * smear, 0.0, 1.0)).r;

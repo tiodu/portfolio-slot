@@ -3,7 +3,11 @@
 import { Leva, useControls } from "leva";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { stripDefaults, type StripControls } from "@/lib/cabinet/strip-shader";
+import {
+  stripDefaults,
+  stripRanges,
+  type StripControls,
+} from "@/lib/cabinet/strip-shader";
 
 export function StripDevPanel({
   onChange,
@@ -13,21 +17,19 @@ export function StripDevPanel({
   const controls = useControls("Strip", {
     hazeAmount: {
       value: stripDefaults.hazeAmount,
-      min: 0,
-      max: 0.05,
-      step: 0.001,
+      ...stripRanges.hazeAmount,
     },
     hazeSpeed: {
       value: stripDefaults.hazeSpeed,
-      min: 0,
-      max: 1,
-      step: 0.01,
+      ...stripRanges.hazeSpeed,
     },
     smearAmount: {
       value: stripDefaults.smearAmount,
-      min: 0,
-      max: 0.05,
-      step: 0.001,
+      ...stripRanges.smearAmount,
+    },
+    smearPulseSpeed: {
+      value: stripDefaults.smearPulseSpeed,
+      ...stripRanges.smearPulseSpeed,
     },
     tint: stripDefaults.tint,
   });
