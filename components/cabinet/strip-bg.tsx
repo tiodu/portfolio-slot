@@ -32,12 +32,10 @@ function subscribeOnce() {
   return () => {};
 }
 
-const StripDevPanel =
-  process.env.NODE_ENV === "development"
-    ? dynamic(() => import("./strip-dev-panel").then((mod) => mod.StripDevPanel), {
-        ssr: false,
-      })
-    : null;
+const StripDevPanel = dynamic(
+  () => import("./strip-dev-panel").then((mod) => mod.StripDevPanel),
+  { ssr: false },
+);
 
 type BoundaryProps = {
   children: ReactNode;
@@ -183,12 +181,19 @@ export function StripBackground() {
   const reduced = useReducedMotion();
   const webgl = useSyncExternalStore(subscribeOnce, supportedWebGL, () => false);
   const lowPower = useSyncExternalStore(subscribeOnce, isLowPowerDevice, () => false);
+  const tune = useSyncExternalStore(
+    subscribeOnce,
+    () => new URLSearchParams(window.location.search).has("tune"),
+    () => false,
+  );
   const [failed, setFailed] = useState(false);
   const [controls, setControls] = useState<StripControls>(stripDefaults);
   const markFailed = useCallback(() => setFailed(true), []);
   const onControls = useCallback((value: StripControls) => setControls(value), []);
 
   const useShader = webgl && !lowPower && !failed;
+  const showPanel =
+    useShader && (process.env.NODE_ENV === "development" || tune);
 
   return (
     <>
@@ -200,7 +205,7 @@ export function StripBackground() {
           <StripCanvas reduced={reduced} controls={controls} />
         </StripBoundary>
       ) : null}
-      {useShader && StripDevPanel ? <StripDevPanel onChange={onControls} /> : null}
+      {showPanel ? <StripDevPanel onChange={onControls} /> : null}
     </>
   );
 }
