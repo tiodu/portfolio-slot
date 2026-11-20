@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { CaseStudy } from "@/lib/case-studies";
+import type { CaseStudy } from "@/content/case-studies";
+import { studyFadeTypes } from "@/lib/study-fade";
 
 export function CaseStudyList({
   studies,
@@ -20,7 +21,12 @@ export function CaseStudyList({
           {studies.map((study) => (
             <li key={study.slug} className="case-study">
               <h2>
-                <Link href={`/work/${study.slug}`}>{study.title}</Link>
+                <Link
+                  href={`/work/${study.slug}`}
+                  transitionTypes={[...studyFadeTypes]}
+                >
+                  {study.title}
+                </Link>
               </h2>
               <p>{study.summary}</p>
             </li>

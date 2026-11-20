@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Ref } from "react";
 import type { ResultCard as ResultCardData } from "@/lib/cabinet/bus";
+import { studyFadeTypes } from "@/lib/study-fade";
 
 export function ResultCard({
   result,
@@ -28,7 +29,9 @@ export function ResultCard({
       <p>{result.body}</p>
       <div className="spin-result-actions">
         {result.href ? (
-          <Link href={result.href}>Read the case study</Link>
+          <Link href={result.href} transitionTypes={[...studyFadeTypes]}>
+            Read the case study
+          </Link>
         ) : null}
         <button type="button" onClick={onClose}>
           Close

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { caseStudies, getCaseStudy } from "@/lib/case-studies";
+import { CaseStudyArticle } from "@/components/case-study-article";
+import { StudyFade } from "@/components/study-fade";
+import { caseStudies, getCaseStudy } from "@/content/case-studies";
 
 export const dynamicParams = false;
 
@@ -40,13 +41,8 @@ export default async function CaseStudyPage({
   }
 
   return (
-    <article className="shell case-study-page">
-      <p className="back-link">
-        <Link href="/#case-studies">Case studies</Link>
-      </p>
-      <h1>{study.title}</h1>
-      <p className="summary">{study.summary}</p>
-      <p className="todo">The rest of this case study is [TODO].</p>
-    </article>
+    <StudyFade name={`study-${study.slug}`}>
+      <CaseStudyArticle study={study} />
+    </StudyFade>
   );
 }
