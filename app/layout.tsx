@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Outfit } from "next/font/google";
 import type { ReactNode } from "react";
+import { ZoomLayer } from "@/components/zoom-layer";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <SiteFooter />
+        <ZoomLayer />
       </body>
     </html>
   );

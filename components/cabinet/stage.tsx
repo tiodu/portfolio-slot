@@ -190,7 +190,7 @@ export function CabinetStage() {
           onClick={onClick}
         />
       ) : null}
-      {result && phase === "landed" ? (
+      {result && phase === "landed" && result.kind !== "study" ? (
         <ResultCard result={result} cardRef={cardRef} onClose={closeResult} />
       ) : null}
       <p className="sr-only" aria-live="polite">

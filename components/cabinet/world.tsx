@@ -31,9 +31,11 @@ import {
   tick,
   type Machine,
 } from "@/lib/cabinet/machine";
-import { frame, plinth } from "@/lib/cabinet/metrics";
+import { frame, plinth, reel, windowFrame } from "@/lib/cabinet/metrics";
 import { pickOutcome } from "@/lib/cabinet/outcome";
 import { createShadowTexture } from "@/lib/cabinet/symbols";
+import { readZoom } from "@/lib/zoom/store";
+import { zoomFrame } from "@/lib/zoom/timeline";
 
 const RigContext = createContext<RefObject<Machine> | null>(null);
 
@@ -105,7 +107,15 @@ function RigDriver({ reduced }: { reduced: boolean }) {
   return null;
 }
 
-function FrameCamera() {
+type RestPose = { position: THREE.Vector3; target: THREE.Vector3; aspect: number };
+
+function keepRest(pose: RestPose, position: THREE.Vector3, aspect: number) {
+  pose.position.copy(position);
+  pose.target.set(0, frame.targetY, 0);
+  pose.aspect = aspect;
+}
+
+function FrameCamera({ rest }: { rest: RefObject<RestPose> }) {
   const camera = useThree((state) => state.camera);
   const size = useThree((state) => state.size);
 
@@ -123,7 +133,45 @@ function FrameCamera() {
     camera.position.set(frame.yaw, frame.targetY, distance);
     camera.lookAt(0, frame.targetY, 0);
     camera.updateProjectionMatrix();
-  }, [camera, size]);
+    keepRest(rest.current, camera.position, aspect);
+  }, [camera, size, rest]);
+
+  return null;
+}
+
+/** Fraction of the window width that the reel window fills when the dolly reaches 1. */
+const WINDOW_FILL = 0.92;
+const WINDOW_CENTRE = new THREE.Vector3(0, reel.y, windowFrame.z);
+
+/**
+ * Reads the zoom progress and dollies the camera towards the reel window with a roll.
+ * `zoomFrame` is the whole timeline; this only turns its numbers into a camera pose.
+ */
+function ZoomCamera({ rest }: { rest: RefObject<RestPose> }) {
+  const camera = useThree((state) => state.camera);
+  const lastT = useRef(0);
+  const position = useMemo(() => new THREE.Vector3(), []);
+  const target = useMemo(() => new THREE.Vector3(), []);
+  const stop = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame(() => {
+    const { t } = readZoom();
+    if (t === lastT.current) return;
+    lastT.current = t;
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
+    const { dolly, rollDeg } = zoomFrame(t);
+    const pose = rest.current;
+    const fov = (camera.fov * Math.PI) / 180;
+    const horizontal = 2 * Math.atan(Math.tan(fov / 2) * pose.aspect);
+    const close = windowFrame.innerWidth / WINDOW_FILL / 2 / Math.tan(horizontal / 2);
+    // The camera stops `close` units from the window, on the line from rest to the window.
+    stop.copy(pose.position).sub(WINDOW_CENTRE).setLength(close).add(WINDOW_CENTRE);
+    position.copy(pose.position).lerp(stop, dolly);
+    target.copy(pose.target).lerp(WINDOW_CENTRE, Math.min(1, dolly));
+    camera.position.copy(position);
+    camera.lookAt(target);
+    camera.rotateZ((rollDeg * Math.PI) / 180);
+  });
 
   return null;
 }
@@ -205,13 +253,19 @@ export function CabinetWorld({
   onReady: () => void;
 }) {
   const rig = useRef(createMachine());
+  const rest = useRef<RestPose>({
+    position: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    aspect: 1,
+  });
   const key = useRef<THREE.DirectionalLight>(null);
   const lights = useMemo(() => [key], []);
 
   return (
     <RigContext value={rig}>
       <RigDriver reduced={reduced} />
-      <FrameCamera />
+      <FrameCamera rest={rest} />
+      <ZoomCamera rest={rest} />
       <Environment frames={1} resolution={128} environmentIntensity={0.95}>
         <Lightformer
           form="rect"
