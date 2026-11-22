@@ -19,7 +19,7 @@ Eduardo de Souza's portfolio: a Googie slot-machine hero over a neon Vegas-strip
 
 ## Locked decisions (don't change without asking Eduardo)
 - Cabinet look: cream front, turquoise sides, chrome, a starburst topper with warm bulbs, pink "Eduardo" / cyan "de Souza", chrome winged badge, red-ball lever.
-- Navigation: each case study is a real `/work/[slug]` page. After a spin, the camera dollies into the landed reel window with a slight (~16 deg) twist, dims to dark, and the page fades up (~1800ms, skippable on any click or key). Back reverses it. List clicks get a ~200ms fade. Reduced motion gets a plain crossfade.
+- Navigation: each case study is a real `/work/[slug]` page. After a spin, the camera dollies into the landed reel window with a slight (~16 deg) twist, dims to dark, and the page fades up (~900ms, set by `ZOOM_MS` in `lib/zoom/timeline.ts`, skippable on any click or key). Back reverses the camera and dim only; the page fade-out is not replayed. List clicks get a ~200ms fade. Reduced motion gets a plain crossfade.
 - Each case study has a strip of three thumbnails (videos or images) near the top.
 - The result card is a modal for now.
 

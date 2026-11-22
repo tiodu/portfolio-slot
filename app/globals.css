@@ -769,3 +769,20 @@ a {
     animation-delay: 0s !important;
   }
 }
+
+/* Zoom transition. Stacking: canvas (hero), then the veil, then the study page. */
+.zoom-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--color-bg);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.zoom-page {
+  position: relative;
+  z-index: 60;
+  opacity: var(--zoom-page, 1);
+}

@@ -42,7 +42,9 @@ export default async function CaseStudyPage({
 
   return (
     <StudyFade name={`study-${study.slug}`}>
-      <CaseStudyArticle study={study} />
+      <div className="zoom-page">
+        <CaseStudyArticle study={study} />
+      </div>
     </StudyFade>
   );
 }
