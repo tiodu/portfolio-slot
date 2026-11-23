@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type RefObject } from "react";
 import * as THREE from "three";
 import { glbRequested } from "@/lib/cabinet/glb-metrics";
 import { useCompactViewport, usePixelRatio, useReducedMotion } from "@/lib/cabinet/use-motion";
@@ -16,9 +16,12 @@ import { CabinetWorld } from "./world";
 export function CabinetScene({
   capture,
   onReady,
+  stage,
 }: {
   capture: boolean;
   onReady: () => void;
+  /** The cabinet column. The canvas may be bigger than it. */
+  stage?: RefObject<HTMLElement | null>;
 }) {
   const reduced = useReducedMotion();
   const compact = useCompactViewport();
@@ -72,7 +75,7 @@ export function CabinetScene({
       frameloop={reduced ? "demand" : "always"}
       gl={gl}
       tabIndex={-1}
-      camera={{ fov: 30, near: 0.1, far: 40, position: [1.45, 0.55, 7.2] }}
+      camera={{ fov: 30, near: 0.1, far: 40, position: [1.45, 0.55, 7.2], manual: true }}
       style={{ background: "transparent" }}
       onCreated={({ gl: renderer }) => {
         renderer.setClearColor(0x000000, 0);
@@ -84,6 +87,7 @@ export function CabinetScene({
         reduced={reduced}
         compact={compact}
         targets={targets}
+        stage={stage}
         readyToShow={glbOn ? glbReady : (neonTargets.length > 0 || fontFailed) && symbolsReady}
         onReady={show}
       >
