@@ -92,7 +92,7 @@ export function CabinetScene({
         onReady={show}
       >
         {glbOn ? (
-          <GlbCabinet onReady={onGlb} />
+          <GlbCabinet onReady={onGlb} onBulbs={onBulbs} />
         ) : (
           <>
             <CabinetBody />

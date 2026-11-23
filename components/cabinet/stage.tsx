@@ -19,6 +19,7 @@ import {
   setLeverDrag,
   subscribeCabinet,
 } from "@/lib/cabinet/bus";
+import { glbRequested } from "@/lib/cabinet/glb-metrics";
 import { supportedWebGL, useReducedMotion } from "@/lib/cabinet/use-motion";
 import { ResultCard } from "./result-card";
 
@@ -64,6 +65,7 @@ export function CabinetStage() {
     () => new URLSearchParams(window.location.search).get("capture") === "1",
     () => false,
   );
+  const glbOn = useSyncExternalStore(subscribeOnce, glbRequested, () => false);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const leverRef = useRef<HTMLButtonElement>(null);
@@ -180,6 +182,7 @@ export function CabinetStage() {
         data-reduced={reduced ? "true" : "false"}
         data-webgl={webgl ? "true" : "false"}
         data-capture={capture ? "true" : "false"}
+      data-glb={glbOn ? "true" : "false"}
         data-phase={phase}
       >
         {sceneInColumn ? scene : null}
