@@ -10,13 +10,15 @@ import { useReducedMotion } from "@/lib/cabinet/use-motion";
 const hot = new THREE.Color(colors.bulbHot);
 const rest = new THREE.Color(colors.bulbRest);
 const PULSE_SIGMA = 1.45;
+/** Bulbs per second that the bright spot travels round the ring. */
+export const CHASE_SPEED = 3.2;
 
-function ringDistance(index: number, head: number, count: number) {
+export function ringDistance(index: number, head: number, count: number) {
   const raw = Math.abs(index - head);
   return Math.min(raw, count - raw);
 }
 
-function paintBulb(target: THREE.Color, distance: number, steady: boolean) {
+export function paintBulb(target: THREE.Color, distance: number, steady: boolean) {
   if (steady) return target.copy(rest);
   const pulse = Math.exp(-(distance * distance) / (2 * PULSE_SIGMA * PULSE_SIGMA));
   return target.copy(rest).lerp(hot, pulse);
@@ -105,7 +107,7 @@ export function Bulbs({
       return;
     }
     paintedSteady.current = false;
-    const head = (state.clock.elapsedTime * 3.2) % positions.length;
+    const head = (state.clock.elapsedTime * CHASE_SPEED) % positions.length;
     positions.forEach((_, index) => {
       const distance = ringDistance(index, head, positions.length);
       mesh.setColorAt(index, paintBulb(color, distance, false));

@@ -213,6 +213,14 @@ a {
   touch-action: none;
 }
 
+/* The Blender cabinet has its lever higher and further right than the procedural one. */
+.cabinet[data-glb="true"] .lever-trigger {
+  right: 0;
+  top: 35%;
+  width: 18%;
+  height: 32%;
+}
+
 .lever-trigger:active {
   cursor: grabbing;
 }
