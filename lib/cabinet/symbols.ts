@@ -132,10 +132,16 @@ function starPath(
   ctx.closePath();
 }
 
-export function createSymbolTexture(anisotropy: number) {
+/**
+ * The strip of symbols, one cell per face, side by side round the drum.
+ * `aspect` is each face's length along the reel axis divided by its length round the drum.
+ * A square face is 1; a narrower drum needs less than 1, a wider one more.
+ */
+export function createSymbolTexture(anisotropy: number, aspect = 1) {
+  const height = Math.round(CELL * aspect);
   const canvas = document.createElement("canvas");
   canvas.width = CELL * FACE_COUNT;
-  canvas.height = CELL;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not draw reel symbols");
 
@@ -144,7 +150,7 @@ export function createSymbolTexture(anisotropy: number) {
 
   for (let index = 0; index < FACE_COUNT; index += 1) {
     ctx.save();
-    ctx.translate(index * CELL + CELL / 2, CELL / 2);
+    ctx.translate(index * CELL + CELL / 2, height / 2);
     // Rotate the cell onto the cylinder, then flip Y so BAR stays upright.
     // A negative X scale keeps the letters reading left to right.
     ctx.rotate(-Math.PI / 2);
