@@ -80,10 +80,11 @@ export function GlbNeon({ onTargets }: { onTargets: (objects: THREE.Object3D[]) 
 
   const publish = () => {
     if (reported.current) return;
-    const objects = [pink.current, cyan.current, glass.current, core.current, head.current].filter(
+    // Only the tubes bloom. The letters are drawn sharp, so the name stays readable.
+    const objects = ([glass.current, core.current, head.current] as Array<THREE.Object3D | null>).filter(
       (object): object is THREE.Object3D => object !== null,
     );
-    if (objects.length < 5) return;
+    if (objects.length < 3 || !pink.current || !cyan.current) return;
     reported.current = true;
     onTargets(objects);
   };
@@ -109,10 +110,10 @@ export function GlbNeon({ onTargets }: { onTargets: (objects: THREE.Object3D[]) 
         anchorY="middle"
         position={[-0.012, 0.538, Z]}
         rotation={[0, 0, 0.13]}
-        outlineWidth="7%"
+        outlineWidth="4.5%"
         outlineColor={colors.neonPink}
         outlineOpacity={1}
-        outlineBlur="1.5%"
+        outlineBlur="0.6%"
         onSync={mark}
       >
         Eduardo
@@ -127,10 +128,10 @@ export function GlbNeon({ onTargets }: { onTargets: (objects: THREE.Object3D[]) 
         anchorY="middle"
         position={[0.008, 0.468, Z]}
         rotation={[0, 0, 0.09]}
-        outlineWidth="7%"
+        outlineWidth="4.5%"
         outlineColor={colors.neonCyan}
         outlineOpacity={1}
-        outlineBlur="1.5%"
+        outlineBlur="0.6%"
         onSync={mark}
       >
         de Souza
