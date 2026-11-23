@@ -30,3 +30,10 @@ export const glbWindow = {
 export function glbRequested() {
   return typeof window !== "undefined" && new URLSearchParams(window.location.search).has("glb");
 }
+
+/**
+ * Each face of a GLB drum is 0.098 m wide along the axis and 2 * pi * 0.11 / 9 m long round it,
+ * so the strip cells are taller than they are wide to keep the symbols undistorted.
+ */
+export const GLB_REEL = { radius: 0.11, width: 0.098 };
+export const glbFaceAspect = (faces: number) => GLB_REEL.width / ((2 * Math.PI * GLB_REEL.radius) / faces);

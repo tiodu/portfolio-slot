@@ -10,7 +10,8 @@ import { REEL_OFFSET } from "@/lib/cabinet/machine";
 import { createSymbolTexture } from "@/lib/cabinet/symbols";
 import { useRig } from "./world";
 
-function useSymbolMap(onReady: () => void) {
+/** The 9-face strip, drawn once the fonts are ready. Calls onReady when it exists. */
+export function useSymbolMap(onReady: () => void, aspect = 1) {
   const gl = useThree((state) => state.gl);
   const [map, setMap] = useState<THREE.CanvasTexture | null>(null);
 
@@ -18,13 +19,13 @@ function useSymbolMap(onReady: () => void) {
     let cancelled = false;
     void document.fonts.ready.then(() => {
       if (cancelled) return;
-      setMap(createSymbolTexture(gl.capabilities.getMaxAnisotropy()));
+      setMap(createSymbolTexture(gl.capabilities.getMaxAnisotropy(), aspect));
       onReady();
     });
     return () => {
       cancelled = true;
     };
-  }, [gl, onReady]);
+  }, [gl, onReady, aspect]);
 
   useEffect(() => {
     return () => map?.dispose();
