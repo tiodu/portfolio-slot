@@ -14,9 +14,9 @@ export function CaseStudyList({
       aria-labelledby="case-studies-heading"
     >
       <div className="shell">
-        <h1 id="case-studies-heading" className="section-label">
+        <h2 id="case-studies-heading" className="section-label">
           Case studies
-        </h1>
+        </h2>
         <ul className="case-study-list">
           {studies.map((study) => (
             <li key={study.slug} className="case-study">

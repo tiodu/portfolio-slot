@@ -8,9 +8,14 @@ export function CabinetHero() {
         <StripBackground />
         <div className="hero-street-fade" />
       </div>
+      <h1 className="sr-only">Eduardo de Souza</h1>
       <div className="hero-stage">
         <CabinetStage />
       </div>
+      <p className="hero-description">
+        Product Design Manager, iGaming UX. Moving into design engineering.
+        Based in Ireland.
+      </p>
     </section>
   );
 }

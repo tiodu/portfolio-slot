@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Fraunces, Outfit } from "next/font/google";
+import { Bricolage_Grotesque, Geist } from "next/font/google";
 import type { ReactNode } from "react";
 import { ZoomLayer } from "@/components/zoom-layer";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
-const outfit = Outfit({
+const geist = Geist({
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
-  variable: "--font-outfit",
+  variable: "--font-geist",
 });
 
-const fraunces = Fraunces({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: "500",
+  weight: ["500", "600"],
   display: "swap",
-  variable: "--font-fraunces",
+  variable: "--font-bricolage",
 });
 
 export const metadata: Metadata = {
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en-GB"
-      className={`${outfit.variable} ${fraunces.variable}`}
+      className={`${geist.variable} ${bricolage.variable}`}
     >
       <body>
         <a className="skip-link" href="#main">

@@ -12,16 +12,16 @@
 
 html {
   color-scheme: dark;
-  background: var(--color-bg);
+  background: var(--bg);
 }
 
 body {
   min-height: 100vh;
-  color: var(--color-text);
-  background-color: var(--color-bg);
+  color: var(--text);
+  background-color: var(--bg);
   background-image: radial-gradient(
     ellipse 90% 45% at 50% -8%,
-    var(--color-bg-glow),
+    var(--bg-glow),
     transparent 70%
   );
   font-family: var(--font-sans);
@@ -44,13 +44,13 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--neon-cyan);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--color-focus);
-  color: var(--color-bg);
+  background: var(--neon-cyan);
+  color: var(--bg);
 }
 
 .skip-link {
@@ -59,8 +59,8 @@ a {
   top: var(--space-4);
   z-index: 2;
   padding: var(--space-2) var(--space-3);
-  background: var(--color-text);
-  color: var(--color-bg);
+  background: var(--text);
+  color: var(--bg);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   text-decoration: none;
@@ -86,38 +86,119 @@ a {
   margin-inline: auto;
 }
 
+/* The header is an overlay on the hero: no band, no border, a soft scrim for legibility. */
 .site-header {
-  padding-block: var(--space-5);
-  border-bottom: 1px solid var(--color-line);
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  height: var(--header-height);
+  padding-inline: var(--page-gutter);
+  background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+  pointer-events: none;
 }
 
-.site-header-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
+.site-header > * {
+  pointer-events: auto;
 }
 
 .site-name {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 500;
+  font-size: 1.25rem;
+  font-weight: 600;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   text-decoration: none;
-  text-wrap: balance;
 }
 
-.site-role {
-  max-width: 36rem;
-  color: var(--color-text-muted);
+.site-nav {
+  display: none;
+  gap: var(--space-5);
   font-size: var(--text-sm);
-  line-height: var(--leading-snug);
+}
+
+.site-nav a,
+.site-menu-panel a {
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-nav a:hover,
+.site-menu-panel a:hover {
+  color: var(--neon-cyan);
+}
+
+.site-nav a[aria-current],
+.site-menu-panel a[aria-current] {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--neon-cyan);
+  text-underline-offset: 0.4em;
+}
+
+.pill {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.pill:hover {
+  border-color: var(--neon-cyan);
+}
+
+.site-menu-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--page-gutter);
+  background: var(--bg);
+}
+
+.site-menu-panel nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+}
+
+.site-menu-panel .pill {
+  position: absolute;
+  top: calc((var(--header-height) - 2.25rem) / 2);
+  right: var(--page-gutter);
+}
+
+@media (min-width: 48rem) {
+  .site-nav {
+    display: flex;
+  }
+
+  .site-menu-button {
+    display: none;
+  }
+}
+
+/* Pages without a hero start below the overlay header. */
+main:not(:has(.hero)) {
+  padding-top: var(--header-height);
 }
 
 .hero {
   position: relative;
-  padding-top: var(--space-4);
+  padding-top: var(--header-height);
   padding-bottom: var(--space-3);
 }
 
@@ -153,7 +234,7 @@ a {
   bottom: 0;
   z-index: 1;
   height: 38%;
-  background: linear-gradient(to bottom, transparent, var(--color-bg));
+  background: linear-gradient(to bottom, transparent, var(--bg));
 }
 
 .hero-stage {
@@ -230,7 +311,7 @@ a {
 }
 
 .lever-trigger:focus {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--neon-cyan);
   outline-offset: -6px;
 }
 
@@ -246,14 +327,14 @@ a {
   max-height: 32%;
   padding: var(--space-3);
   overflow: auto;
-  background: var(--color-bg-raised);
-  color: var(--color-text);
-  border: 1px solid var(--color-line);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
 }
 
 .spin-result:focus {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--neon-cyan);
   outline-offset: 3px;
 }
 
@@ -267,7 +348,7 @@ a {
 }
 
 .spin-result p {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
 }
@@ -291,24 +372,24 @@ a {
 .spin-result button {
   font: inherit;
   font-size: var(--text-sm);
-  color: var(--color-text);
+  color: var(--text);
 }
 
 .spin-result a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
 }
 
 .spin-result a:hover,
 .spin-result a:focus-visible {
-  text-decoration-color: var(--color-text);
+  text-decoration-color: var(--text);
 }
 
 .spin-result button {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
@@ -343,7 +424,7 @@ a {
 }
 
 .section-label {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
@@ -355,7 +436,7 @@ a {
   z-index: 1;
   padding-top: var(--space-4);
   scroll-margin-top: var(--space-5);
-  background: var(--color-bg);
+  background: var(--bg);
 }
 
 .section-label {
@@ -373,7 +454,7 @@ a {
 }
 
 .case-study + .case-study {
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--hairline);
 }
 
 .case-study h2 {
@@ -388,7 +469,7 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
@@ -400,12 +481,12 @@ a {
 
 .case-study a:hover,
 .case-study a:focus-visible {
-  text-decoration-color: var(--color-text);
+  text-decoration-color: var(--text);
 }
 
 .case-study p {
   margin-top: var(--space-2);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .case-study-page {
@@ -429,7 +510,7 @@ a {
 
 .todo {
   margin-top: var(--space-5);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
 }
 
@@ -443,24 +524,24 @@ a {
 }
 
 .back-link a {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .back-link a:hover,
 .back-link a:focus-visible {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .site-footer {
   padding-block: var(--space-7) var(--space-8);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
 }
 
@@ -468,15 +549,15 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .site-footer a:hover,
 .site-footer a:focus-visible {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 /* Case studies. Cream type on the same ground as the rest of the site.
@@ -490,8 +571,8 @@ a {
   position: sticky;
   top: 0;
   z-index: 4;
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-line);
+  background: var(--bg);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .study-bar-inner {
@@ -504,20 +585,20 @@ a {
 }
 
 .study-bar a {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .study-bar a:hover,
 .study-bar a:focus-visible {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .study-bar nav ul {
@@ -539,7 +620,7 @@ a {
   margin-top: var(--space-5);
   padding: 0;
   list-style: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
@@ -561,7 +642,7 @@ a {
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
   margin-top: var(--space-3);
-  color: var(--color-text);
+  color: var(--text);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
 }
@@ -572,7 +653,7 @@ a {
 }
 
 .study-meta dt {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -604,10 +685,10 @@ a {
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--color-bg-glow), var(--color-bg-raised));
-  color: var(--color-text-muted);
+  background: linear-gradient(180deg, var(--bg-glow), var(--surface));
+  color: var(--text-muted);
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -615,7 +696,7 @@ a {
 
 .study-strip figcaption {
   margin-top: var(--space-2);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
 }
@@ -665,13 +746,13 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .study-section a:hover,
 .study-section a:focus-visible {
-  text-decoration-color: var(--color-text);
+  text-decoration-color: var(--text);
 }
 
 .study-section .study-pairs {
@@ -682,7 +763,7 @@ a {
 .study-pairs > li + li {
   margin-top: var(--space-4);
   padding-top: var(--space-4);
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--hairline);
 }
 
 .study-pairs p + p {
@@ -692,7 +773,7 @@ a {
 .study-pair-label {
   display: block;
   margin-bottom: var(--space-1);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
@@ -709,7 +790,7 @@ a {
   gap: var(--space-4);
   margin-top: var(--space-8);
   padding-top: var(--space-5);
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--hairline);
 }
 
 .study-reel {
@@ -726,20 +807,20 @@ a {
 }
 
 .study-reel-label {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .study-reel:hover .study-reel-label,
 .study-reel:focus-visible .study-reel-label {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .study-reel-title {
@@ -793,7 +874,7 @@ a {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: var(--color-bg);
+  background: var(--bg);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -804,3 +885,22 @@ a {
   z-index: 60;
   opacity: var(--zoom-page, 1);
 }
+
+.hero-description {
+  position: relative;
+  z-index: 2;
+  max-width: 28ch;
+  margin: var(--space-4) auto 0;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: var(--leading-snug);
+  text-align: center;
+}
+
+.placeholder-section {
+  padding-block: var(--space-8);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  scroll-margin-top: var(--header-height);
+}
+#case-studies { scroll-margin-top: var(--header-height); }
