@@ -31,6 +31,7 @@ import {
   tick,
   type Machine,
 } from "@/lib/cabinet/machine";
+import { glbRequested, glbWindow } from "@/lib/cabinet/glb-metrics";
 import { frame, plinth, reel, windowFrame } from "@/lib/cabinet/metrics";
 import { pickOutcome } from "@/lib/cabinet/outcome";
 import { createShadowTexture } from "@/lib/cabinet/symbols";
@@ -142,6 +143,7 @@ function FrameCamera({ rest }: { rest: RefObject<RestPose> }) {
 /** Fraction of the window width that the reel window fills when the dolly reaches 1. */
 const WINDOW_FILL = 0.92;
 const WINDOW_CENTRE = new THREE.Vector3(0, reel.y, windowFrame.z);
+const GLB_WINDOW_CENTRE = new THREE.Vector3(...glbWindow.centre);
 
 /**
  * Reads the zoom progress and dollies the camera towards the reel window with a roll.
@@ -153,6 +155,9 @@ function ZoomCamera({ rest }: { rest: RefObject<RestPose> }) {
   const position = useMemo(() => new THREE.Vector3(), []);
   const target = useMemo(() => new THREE.Vector3(), []);
   const stop = useMemo(() => new THREE.Vector3(), []);
+  const glbOn = useMemo(() => glbRequested(), []);
+  const windowCentre = glbOn ? GLB_WINDOW_CENTRE : WINDOW_CENTRE;
+  const windowWidth = glbOn ? glbWindow.innerWidth : windowFrame.innerWidth;
 
   useFrame(() => {
     const { t } = readZoom();
@@ -163,11 +168,11 @@ function ZoomCamera({ rest }: { rest: RefObject<RestPose> }) {
     const pose = rest.current;
     const fov = (camera.fov * Math.PI) / 180;
     const horizontal = 2 * Math.atan(Math.tan(fov / 2) * pose.aspect);
-    const close = windowFrame.innerWidth / WINDOW_FILL / 2 / Math.tan(horizontal / 2);
+    const close = windowWidth / WINDOW_FILL / 2 / Math.tan(horizontal / 2);
     // The camera stops `close` units from the window, on the line from rest to the window.
-    stop.copy(pose.position).sub(WINDOW_CENTRE).setLength(close).add(WINDOW_CENTRE);
+    stop.copy(pose.position).sub(windowCentre).setLength(close).add(windowCentre);
     position.copy(pose.position).lerp(stop, dolly);
-    target.copy(pose.target).lerp(WINDOW_CENTRE, Math.min(1, dolly));
+    target.copy(pose.target).lerp(windowCentre, Math.min(1, dolly));
     camera.position.copy(position);
     camera.lookAt(target);
     camera.rotateZ((rollDeg * Math.PI) / 180);

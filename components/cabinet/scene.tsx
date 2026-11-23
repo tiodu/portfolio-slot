@@ -3,9 +3,11 @@
 import { Canvas } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
+import { glbRequested } from "@/lib/cabinet/glb-metrics";
 import { useCompactViewport, usePixelRatio, useReducedMotion } from "@/lib/cabinet/use-motion";
 import { Bulbs } from "./bulbs";
 import { CabinetBody } from "./body";
+import { GlbCabinet } from "./glb-cabinet";
 import { Lever } from "./lever";
 import { NeonSign } from "./neon";
 import { Reels } from "./reels";
@@ -25,6 +27,9 @@ export function CabinetScene({
   const [neonTargets, setNeonTargets] = useState<THREE.Object3D[]>([]);
   const [symbolsReady, setSymbolsReady] = useState(false);
   const [fontFailed, setFontFailed] = useState(false);
+  const [glbOn] = useState(glbRequested);
+  const [glbReady, setGlbReady] = useState(false);
+  const onGlb = useCallback(() => setGlbReady(true), []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setFontFailed(true), 2500);
@@ -79,14 +84,20 @@ export function CabinetScene({
         reduced={reduced}
         compact={compact}
         targets={targets}
-        readyToShow={(neonTargets.length > 0 || fontFailed) && symbolsReady}
+        readyToShow={glbOn ? glbReady : (neonTargets.length > 0 || fontFailed) && symbolsReady}
         onReady={show}
       >
-        <CabinetBody />
-        <Reels onReady={onSymbols} />
-        <Bulbs onMesh={onBulbs} />
-        <Lever />
-        <NeonSign onTargets={onNeon} />
+        {glbOn ? (
+          <GlbCabinet onReady={onGlb} />
+        ) : (
+          <>
+            <CabinetBody />
+            <Reels onReady={onSymbols} />
+            <Bulbs onMesh={onBulbs} />
+            <Lever />
+            <NeonSign onTargets={onNeon} />
+          </>
+        )}
       </CabinetWorld>
     </Canvas>
   );
