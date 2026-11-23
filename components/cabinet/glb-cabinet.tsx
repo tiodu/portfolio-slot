@@ -11,6 +11,7 @@ import { FACE_COUNT } from "@/lib/cabinet/symbol-list";
 import { useReducedMotion } from "@/lib/cabinet/use-motion";
 import { CHASE_SPEED, paintBulb, ringDistance } from "./bulbs";
 import { useSymbolMap } from "./reels";
+import { GlbNeon } from "./glb-neon";
 import { useRig } from "./world";
 
 /** How far the lever turns when it is fully pulled, in radians. It swings towards the player. */
@@ -18,7 +19,7 @@ const LEVER_PULLED = 1.15;
 
 /**
  * The Blender cabinet, standing on the floor. The machine drives its reels, lever and bulbs;
- * the neon comes in a later slice.
+ * the neon sign is drawn in code in front of the star.
  *
  * The strip is drawn here, not in Blender, so the nine symbols have one source (symbol-list.ts).
  * The reel UVs wrap round the drum like the strip (see glb-contract.test.ts), so a reel turned
@@ -27,8 +28,11 @@ const LEVER_PULLED = 1.15;
 export function GlbCabinet({
   onReady,
   onBulbs,
+  onNeon,
 }: {
   onReady: () => void;
+  /** Gets the neon objects once they exist, for the bloom. */
+  onNeon: (objects: THREE.Object3D[]) => void;
   /** Gets the bulbs as one instanced mesh, for the bloom, and null when they go away. */
   onBulbs: (mesh: THREE.InstancedMesh | null) => void;
 }) {
@@ -128,6 +132,7 @@ export function GlbCabinet({
   return (
     <group position={[0, glb.floorY - glb.footY * glb.scale, 0]} scale={glb.scale}>
       <primitive object={scene} />
+      <GlbNeon onTargets={onNeon} />
     </group>
   );
 }

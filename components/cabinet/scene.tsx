@@ -88,11 +88,11 @@ export function CabinetScene({
         compact={compact}
         targets={targets}
         stage={stage}
-        readyToShow={glbOn ? glbReady : (neonTargets.length > 0 || fontFailed) && symbolsReady}
+        readyToShow={(neonTargets.length > 0 || fontFailed) && (glbOn ? glbReady : symbolsReady)}
         onReady={show}
       >
         {glbOn ? (
-          <GlbCabinet onReady={onGlb} onBulbs={onBulbs} />
+          <GlbCabinet onReady={onGlb} onBulbs={onBulbs} onNeon={onNeon} />
         ) : (
           <>
             <CabinetBody />
