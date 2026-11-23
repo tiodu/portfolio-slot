@@ -58,8 +58,8 @@ export const lever = {
 export const colors = spec.colors;
 
 export const frame = {
-  height: 3.75,
-  width: 2.95,
+  height: 3.3,
+  width: 2.6,
   fov: 30,
   targetY: 0.55,
   yaw: 1.45,
