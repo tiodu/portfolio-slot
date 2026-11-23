@@ -10,6 +10,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -108,21 +109,84 @@ function RigDriver({ reduced }: { reduced: boolean }) {
   return null;
 }
 
-type RestPose = { position: THREE.Vector3; target: THREE.Vector3; aspect: number };
+/** A rectangle in canvas pixels. */
+type Box = { x: number; y: number; w: number; h: number };
 
-function keepRest(pose: RestPose, position: THREE.Vector3, aspect: number) {
+type RestPose = {
+  position: THREE.Vector3;
+  target: THREE.Vector3;
+  /** Aspect of the whole canvas. */
+  aspect: number;
+  /** Where the cabinet column sits inside the canvas. It is the whole canvas when they match. */
+  stage: Box;
+  canvas: { w: number; h: number };
+};
+
+function keepRest(pose: RestPose, position: THREE.Vector3, stage: Box, canvas: { w: number; h: number }) {
   pose.position.copy(position);
   pose.target.set(0, frame.targetY, 0);
-  pose.aspect = aspect;
+  pose.aspect = canvas.w / Math.max(1, canvas.h);
+  pose.stage = stage;
+  pose.canvas = canvas;
 }
 
-function FrameCamera({ rest }: { rest: RefObject<RestPose> }) {
+const lerp = (from: number, to: number, k: number) => from + (to - from) * k;
+
+/**
+ * The canvas can be bigger than the cabinet column (it covers the whole hero, so the zoom can
+ * fill it). A view offset renders the camera's frame into just the column at k = 0, and grows
+ * that frame to the whole canvas at k = 1. Everything in between is a straight blend, so the
+ * zoom needs no jump.
+ */
+function applyView(camera: THREE.PerspectiveCamera, pose: RestPose, k: number) {
+  const { stage, canvas } = pose;
+  const fullW = lerp(stage.w, canvas.w, k);
+  const fullH = lerp(stage.h, canvas.h, k);
+  camera.aspect = fullW / fullH;
+  camera.setViewOffset(fullW, fullH, lerp(-stage.x, 0, k), lerp(-stage.y, 0, k), canvas.w, canvas.h);
+}
+
+function FrameCamera({
+  rest,
+  stage,
+}: {
+  rest: RefObject<RestPose>;
+  stage?: RefObject<HTMLElement | null>;
+}) {
   const camera = useThree((state) => state.camera);
   const size = useThree((state) => state.size);
+  const element = useThree((state) => state.gl.domElement);
+  const [layout, setLayout] = useState(0);
+
+  // The column can resize without the canvas resizing, so watch both.
+  useEffect(() => {
+    const column = stage?.current;
+    if (!column || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => setLayout((value) => value + 1));
+    observer.observe(column);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [stage, element]);
 
   useLayoutEffect(() => {
     if (!(camera instanceof THREE.PerspectiveCamera)) return;
-    const aspect = size.width / Math.max(1, size.height);
+    const canvas = { w: size.width, h: Math.max(1, size.height) };
+    let box: Box = { x: 0, y: 0, w: canvas.w, h: canvas.h };
+    const column = stage?.current;
+    if (column) {
+      const columnRect = column.getBoundingClientRect();
+      const canvasRect = element.getBoundingClientRect();
+      if (columnRect.width > 0 && columnRect.height > 0) {
+        box = {
+          x: columnRect.left - canvasRect.left,
+          y: columnRect.top - canvasRect.top,
+          w: columnRect.width,
+          h: columnRect.height,
+        };
+      }
+    }
+    // The cabinet is fitted to the column, not to the whole canvas.
+    const aspect = box.w / box.h;
     const fov = (frame.fov * Math.PI) / 180;
     const distanceForHeight = frame.height / 2 / Math.tan(fov / 2);
     const horizontalFov = 2 * Math.atan(Math.tan(fov / 2) * aspect);
@@ -133,9 +197,9 @@ function FrameCamera({ rest }: { rest: RefObject<RestPose> }) {
     camera.fov = frame.fov;
     camera.position.set(frame.yaw, frame.targetY, distance);
     camera.lookAt(0, frame.targetY, 0);
-    camera.updateProjectionMatrix();
-    keepRest(rest.current, camera.position, aspect);
-  }, [camera, size, rest]);
+    keepRest(rest.current, camera.position, box, canvas);
+    applyView(camera, rest.current, 0);
+  }, [camera, size, rest, stage, element, layout]);
 
   return null;
 }
@@ -167,6 +231,7 @@ function ZoomCamera({ rest }: { rest: RefObject<RestPose> }) {
     const { dolly, rollDeg } = zoomFrame(t);
     const pose = rest.current;
     const fov = (camera.fov * Math.PI) / 180;
+    // The zoom ends with the window filling the whole canvas, so use the canvas aspect.
     const horizontal = 2 * Math.atan(Math.tan(fov / 2) * pose.aspect);
     const close = windowWidth / WINDOW_FILL / 2 / Math.tan(horizontal / 2);
     // The camera stops `close` units from the window, on the line from rest to the window.
@@ -176,6 +241,7 @@ function ZoomCamera({ rest }: { rest: RefObject<RestPose> }) {
     camera.position.copy(position);
     camera.lookAt(target);
     camera.rotateZ((rollDeg * Math.PI) / 180);
+    applyView(camera, pose, Math.min(1, dolly));
   });
 
   return null;
@@ -249,7 +315,10 @@ export function CabinetWorld({
   targets,
   readyToShow,
   onReady,
+  stage,
 }: {
+  /** The cabinet column in the page. The camera fits the cabinet to it. */
+  stage?: RefObject<HTMLElement | null>;
   children: ReactNode;
   reduced: boolean;
   compact: boolean;
@@ -262,6 +331,8 @@ export function CabinetWorld({
     position: new THREE.Vector3(),
     target: new THREE.Vector3(),
     aspect: 1,
+    stage: { x: 0, y: 0, w: 1, h: 1 },
+    canvas: { w: 1, h: 1 },
   });
   const key = useRef<THREE.DirectionalLight>(null);
   const lights = useMemo(() => [key], []);
@@ -269,7 +340,7 @@ export function CabinetWorld({
   return (
     <RigContext value={rig}>
       <RigDriver reduced={reduced} />
-      <FrameCamera rest={rest} />
+      <FrameCamera rest={rest} stage={stage} />
       <ZoomCamera rest={rest} />
       <Environment frames={1} resolution={128} environmentIntensity={0.95}>
         <Lightformer

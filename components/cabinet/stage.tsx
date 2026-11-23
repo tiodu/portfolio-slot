@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { createPortal } from "react-dom";
 import {
   Component,
   useCallback,
@@ -66,6 +67,14 @@ export function CabinetStage() {
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const leverRef = useRef<HTMLButtonElement>(null);
+  // The canvas is mounted on the hero, not in this column, so the zoom can fill the hero.
+  // The column stays as the layout box the camera fits the cabinet to.
+  const column = useRef<HTMLDivElement | null>(null);
+  const [hero, setHero] = useState<HTMLElement | null>(null);
+  const columnRef = useCallback((element: HTMLDivElement | null) => {
+    column.current = element;
+    setHero(element?.closest<HTMLElement>(".hero") ?? null);
+  }, []);
   const cardRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ y: number } | null>(null);
   const dragged = useRef(false);
@@ -75,6 +84,19 @@ export function CabinetStage() {
   if (!showScene && ready) setReady(false);
   const live = ready && showScene;
   const { phase, result, announcement } = cabinet;
+  // Capture mode keeps the canvas in the column, so the still is cropped to the cabinet.
+  const sceneInColumn = showScene && capture;
+  const scene = showScene ? (
+    <SceneBoundary onFail={markFailed}>
+      <div
+        className={capture ? "cabinet-scene" : "cabinet-scene cabinet-scene-hero"}
+        data-phase={phase}
+        data-live={live ? "true" : "false"}
+      >
+        <CabinetScene capture={capture} onReady={markReady} stage={column} />
+      </div>
+    </SceneBoundary>
+  ) : null;
 
   useEffect(() => {
     if (phase !== "landed") return;
@@ -149,53 +171,51 @@ export function CabinetStage() {
     announcement || (live ? "Pull the lever or press Space to spin." : "");
 
   return (
-    <div
-      className="cabinet"
-      data-live={live ? "true" : "false"}
-      data-reduced={reduced ? "true" : "false"}
-      data-webgl={webgl ? "true" : "false"}
-      data-capture={capture ? "true" : "false"}
-      data-phase={phase}
-    >
-      {showScene ? (
-        <SceneBoundary onFail={markFailed}>
-          <div className="cabinet-scene" data-phase={phase}>
-            <CabinetScene capture={capture} onReady={markReady} />
-          </div>
-        </SceneBoundary>
-      ) : null}
-      {/* Captured from this same canvas. next/image would resample the frame. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        className="cabinet-still"
-        src="/cabinet-still.webp"
-        alt="A cream and turquoise Googie slot cabinet with a starburst sign reading Eduardo de Souza, three reels, and a lever."
-        width={807}
-        height={1210}
-        decoding="async"
-        fetchPriority="high"
-        aria-hidden={live ? true : undefined}
-      />
-      {live ? (
-        <button
-          ref={leverRef}
-          type="button"
-          className="lever-trigger"
-          aria-label="Pull the lever"
-          aria-disabled={phase !== "idle"}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onClick={onClick}
+    <>
+      {scene && !capture && hero ? createPortal(scene, hero) : null}
+      <div
+        ref={columnRef}
+        className="cabinet"
+        data-live={live ? "true" : "false"}
+        data-reduced={reduced ? "true" : "false"}
+        data-webgl={webgl ? "true" : "false"}
+        data-capture={capture ? "true" : "false"}
+        data-phase={phase}
+      >
+        {sceneInColumn ? scene : null}
+        {/* Captured from this same canvas. next/image would resample the frame. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="cabinet-still"
+          src="/cabinet-still.webp"
+          alt="A cream and turquoise Googie slot cabinet with a starburst sign reading Eduardo de Souza, three reels, and a lever."
+          width={807}
+          height={1210}
+          decoding="async"
+          fetchPriority="high"
+          aria-hidden={live ? true : undefined}
         />
-      ) : null}
-      {result && phase === "landed" && result.kind !== "study" ? (
-        <ResultCard result={result} cardRef={cardRef} onClose={closeResult} />
-      ) : null}
-      <p className="sr-only" aria-live="polite">
-        {spoken}
-      </p>
-    </div>
+        {live ? (
+          <button
+            ref={leverRef}
+            type="button"
+            className="lever-trigger"
+            aria-label="Pull the lever"
+            aria-disabled={phase !== "idle"}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onClick={onClick}
+          />
+        ) : null}
+        {result && phase === "landed" && result.kind !== "study" ? (
+          <ResultCard result={result} cardRef={cardRef} onClose={closeResult} />
+        ) : null}
+        <p className="sr-only" aria-live="polite">
+          {spoken}
+        </p>
+      </div>
+    </>
   );
 }
