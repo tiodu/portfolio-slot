@@ -10,6 +10,11 @@ import { ARROW_HEAD, ARROW_TUBE, neonPoint } from "@/lib/cabinet/neon-path";
 const FONT = "/fonts/Damion-Regular.ttf";
 /** Just in front of the teal panel, in metres. */
 const Z = 0.205;
+/** The light inside each letter, so the colour reads as a glowing tube around a hot centre. */
+const CORE_PINK = "#ffd2ea";
+const CORE_CYAN = "#d2fbff";
+/** The traced swoosh is moved down a little so it clears the cyan line. */
+const ARROW_SHIFT: [number, number, number] = [0, -0.012, 0];
 const GLASS = 0.0042;
 const CORE = 0.0016;
 /** The arrowhead is drawn heavier than the swoosh, like the reference. */
@@ -98,16 +103,16 @@ export function GlbNeon({ onTargets }: { onTargets: (objects: THREE.Object3D[]) 
         ref={pink}
         font={FONT}
         characters="Eduardo de Souza"
-        fontSize={0.108}
-        color={colors.neonPink}
+        fontSize={0.094}
+        color={CORE_PINK}
         anchorX="center"
         anchorY="middle"
-        position={[-0.004, 0.545, Z]}
-        rotation={[0, 0, 0.15]}
-        outlineWidth="2.5%"
+        position={[-0.012, 0.538, Z]}
+        rotation={[0, 0, 0.13]}
+        outlineWidth="7%"
         outlineColor={colors.neonPink}
-        outlineOpacity={0.9}
-        outlineBlur="2.5%"
+        outlineOpacity={1}
+        outlineBlur="1.5%"
         onSync={mark}
       >
         Eduardo
@@ -116,23 +121,23 @@ export function GlbNeon({ onTargets }: { onTargets: (objects: THREE.Object3D[]) 
         ref={cyan}
         font={FONT}
         characters="Eduardo de Souza"
-        fontSize={0.082}
-        color={colors.neonCyan}
+        fontSize={0.074}
+        color={CORE_CYAN}
         anchorX="center"
         anchorY="middle"
-        position={[0.012, 0.455, Z]}
-        rotation={[0, 0, 0.1]}
-        outlineWidth="2.5%"
+        position={[0.008, 0.468, Z]}
+        rotation={[0, 0, 0.09]}
+        outlineWidth="7%"
         outlineColor={colors.neonCyan}
-        outlineOpacity={0.85}
-        outlineBlur="2.5%"
+        outlineOpacity={1}
+        outlineBlur="1.5%"
         onSync={mark}
       >
         de Souza
       </Text>
-      <mesh ref={glass} geometry={resources.glassGeometry} material={resources.glassMaterial} />
-      <mesh ref={core} geometry={resources.coreGeometry} material={resources.coreMaterial} position={[0, 0, 0.0012]} />
-      <group ref={head}>
+      <mesh ref={glass} geometry={resources.glassGeometry} material={resources.glassMaterial} position={ARROW_SHIFT} />
+      <mesh ref={core} geometry={resources.coreGeometry} material={resources.coreMaterial} position={[ARROW_SHIFT[0], ARROW_SHIFT[1], 0.0012]} />
+      <group ref={head} position={ARROW_SHIFT}>
         {resources.barbGlass.map((geometry, index) => (
           <mesh key={`g${index}`} geometry={geometry} material={resources.glassMaterial} />
         ))}
