@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /*
-  Targets: home scrolls to the top, work to the case study list. About and
-  contact are placeholder sections on the home page until they get routes.
+  Targets: home scrolls to the top, work to the case study list, about is its
+  own page, and contact is a mailto link (no page).
 */
 const NAV = [
   { id: "home", label: "home", href: "/" },
-  { id: "about", label: "about", href: "/#about" },
+  { id: "about", label: "about", href: "/about" },
   { id: "work", label: "work", href: "/#case-studies" },
-  { id: "contact", label: "contact", href: "/#contact" },
+  { id: "contact", label: "contact", href: "mailto:eduardo.freire.souza@gmail.com" },
 ] as const;
 
 type NavId = (typeof NAV)[number]["id"];
@@ -23,19 +23,11 @@ function useCurrentSection(pathname: string): NavId {
 
   useEffect(() => {
     if (pathname !== "/") return;
-    const ids: NavId[] = ["about", "work", "contact"];
-    const target = (id: NavId) =>
-      document.getElementById(id === "work" ? "case-studies" : id);
     const update = () => {
-      // The last section whose top has passed the upper third of the viewport.
-      let current: NavId = "home";
-      for (const id of ids) {
-        const el = target(id);
-        if (el && el.getBoundingClientRect().top < window.innerHeight / 3) {
-          current = id;
-        }
-      }
-      setSection(current);
+      // "work" is current once the case study list reaches the upper third of the viewport.
+      const list = document.getElementById("case-studies");
+      const passed = list && list.getBoundingClientRect().top < window.innerHeight / 3;
+      setSection(passed ? "work" : "home");
     };
     update();
     window.addEventListener("scroll", update, { passive: true });
@@ -47,6 +39,7 @@ function useCurrentSection(pathname: string): NavId {
   }, [pathname]);
 
   if (pathname.startsWith("/work")) return "work";
+  if (pathname.startsWith("/about")) return "about";
   return section;
 }
 

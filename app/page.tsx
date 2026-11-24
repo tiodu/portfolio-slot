@@ -8,12 +8,6 @@ export default function HomePage() {
     <StudyFade name="home">
       <CabinetHero />
       <CaseStudyList studies={caseStudies} />
-      <section id="about" className="placeholder-section" aria-label="About">
-        <div className="shell">[TODO] About: copy to come from the live site.</div>
-      </section>
-      <section id="contact" className="placeholder-section" aria-label="Contact">
-        <div className="shell">[TODO] Contact: copy to come from the live site.</div>
-      </section>
     </StudyFade>
   );
 }
