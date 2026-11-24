@@ -1063,3 +1063,51 @@ main:not(:has(.hero)) {
   letter-spacing: var(--tracking-tight);
 }
 #case-studies { scroll-margin-top: var(--header-height); }
+
+.about-page > p {
+  max-width: 62ch;
+  margin-bottom: var(--space-4);
+}
+
+.about-lead {
+  color: var(--text);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+.about-heading {
+  margin: var(--space-7) 0 var(--space-4);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+.about-experience {
+  display: grid;
+  gap: var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.about-experience li {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.about-experience h3 {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.about-experience p {
+  max-width: 62ch;
+}
+
+.about-place {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+}
