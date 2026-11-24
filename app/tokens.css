@@ -5,18 +5,21 @@
 */
 
 :root {
-  /* Colour. Dark and warm, ready to sit under a neon night later. */
-  --color-bg: #0e0d0b;
-  --color-bg-raised: #171512;
-  --color-bg-glow: #241f18;
-  --color-text: #f4f0e6;
-  --color-text-muted: #b0aa9e;
-  --color-line: #2c2923;
-  --color-focus: #e4c56d;
+  /* Colour. Dark only. Neon accents are for focus rings, hover states and the
+     hint line, never for body text. */
+  --bg: #0c0a0f;
+  --surface: #15111a;
+  --bg-glow: #1d1424;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --text: #f2ede4;
+  --text-muted: #b3aba0;
+  --neon-magenta: #ff3d8b;
+  --neon-cyan: #35d0e6;
+  --neon-amber: #ffb347;
 
   /* Type. */
-  --font-sans: var(--font-outfit), "Segoe UI", sans-serif;
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-geist), "Segoe UI", sans-serif;
+  --font-display: var(--font-bricolage), "Segoe UI", sans-serif;
   --text-sm: 0.875rem;
   --text-md: 1rem;
   --text-lg: 1.25rem;
@@ -51,6 +54,7 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Layout. */
+  --header-height: 4.5rem;
   --page-width: 40rem;
   --page-gutter: var(--space-5);
   /* Portrait frame reserved for the future three-reel cabinet. */

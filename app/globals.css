@@ -12,16 +12,16 @@
 
 html {
   color-scheme: dark;
-  background: var(--color-bg);
+  background: var(--bg);
 }
 
 body {
   min-height: 100vh;
-  color: var(--color-text);
-  background-color: var(--color-bg);
+  color: var(--text);
+  background-color: var(--bg);
   background-image: radial-gradient(
     ellipse 90% 45% at 50% -8%,
-    var(--color-bg-glow),
+    var(--bg-glow),
     transparent 70%
   );
   font-family: var(--font-sans);
@@ -44,13 +44,13 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--neon-cyan);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--color-focus);
-  color: var(--color-bg);
+  background: var(--neon-cyan);
+  color: var(--bg);
 }
 
 .skip-link {
@@ -59,8 +59,8 @@ a {
   top: var(--space-4);
   z-index: 2;
   padding: var(--space-2) var(--space-3);
-  background: var(--color-text);
-  color: var(--color-bg);
+  background: var(--text);
+  color: var(--bg);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   text-decoration: none;
@@ -86,39 +86,125 @@ a {
   margin-inline: auto;
 }
 
+/* The header is an overlay on the hero: no band, no border, a soft scrim for legibility. */
 .site-header {
-  padding-block: var(--space-5);
-  border-bottom: 1px solid var(--color-line);
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  height: var(--header-height);
+  padding-inline: var(--page-gutter);
+  background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+  pointer-events: none;
 }
 
-.site-header-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
+.site-header > * {
+  pointer-events: auto;
 }
 
 .site-name {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 500;
+  font-size: 1.25rem;
+  font-weight: 600;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
   text-decoration: none;
-  text-wrap: balance;
 }
 
-.site-role {
-  max-width: 36rem;
-  color: var(--color-text-muted);
+.site-nav {
+  display: none;
+  gap: var(--space-5);
   font-size: var(--text-sm);
-  line-height: var(--leading-snug);
+}
+
+.site-nav a,
+.site-menu-panel a {
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-nav a:hover,
+.site-menu-panel a:hover {
+  color: var(--neon-cyan);
+}
+
+.site-nav a[aria-current],
+.site-menu-panel a[aria-current] {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--neon-cyan);
+  text-underline-offset: 0.4em;
+}
+
+.pill {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.pill:hover {
+  border-color: var(--neon-cyan);
+}
+
+.site-menu-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--page-gutter);
+  background: var(--bg);
+}
+
+.site-menu-panel nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+}
+
+.site-menu-panel .pill {
+  position: absolute;
+  top: calc((var(--header-height) - 2.25rem) / 2);
+  right: var(--page-gutter);
+}
+
+@media (min-width: 48rem) {
+  .site-nav {
+    display: flex;
+  }
+
+  .site-menu-button {
+    display: none;
+  }
+}
+
+/* Pages without a hero start below the overlay header. */
+main:not(:has(.hero)) {
+  padding-top: var(--header-height);
 }
 
 .hero {
   position: relative;
-  padding-top: var(--space-4);
-  padding-bottom: var(--space-3);
+  height: 100svh;
+  min-height: 34rem;
+  overflow: hidden;
+  /* Stage size and floor line: the cabinet's share of the hero height, and the
+     band of street under its feet. */
+  --stage-h: max(55svh, 20rem);
+  --floor: 20svh;
 }
 
 .hero-street {
@@ -153,14 +239,171 @@ a {
   bottom: 0;
   z-index: 1;
   height: 38%;
-  background: linear-gradient(to bottom, transparent, var(--color-bg));
+  background: linear-gradient(to bottom, transparent, var(--bg));
+}
+
+.hero-parallax {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  transform: scale(1.04);
+}
+
+/* Stacked layout (mobile, tablet, portrait): cabinet, hint, then description below it. */
+.hero-layout {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--header-height) var(--page-gutter) var(--space-5);
+  pointer-events: none;
 }
 
 .hero-stage {
   position: relative;
-  z-index: 2;
-  width: min(94vw, 34rem, calc((100svh - 16rem) * 2 / 3));
-  margin-inline: auto;
+  flex: none;
+  height: var(--stage-h);
+  width: calc(var(--stage-h) * 2 / 3);
+  margin-bottom: var(--space-5);
+  pointer-events: auto;
+}
+
+/* The reflection hangs under the cabinet: flipped, blurred, faint, fading out downwards. */
+.hero-reflection {
+  position: absolute;
+  top: calc(100% - 4%);
+  left: 0;
+  width: 100%;
+  height: 28%;
+  object-fit: cover;
+  object-position: bottom;
+  transform: scaleY(-1);
+  filter: blur(8px);
+  opacity: 0.14;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+}
+
+.hero-description {
+  position: relative;
+  max-width: 28ch;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: var(--leading-snug);
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: auto;
+}
+
+/* A soft dark pool behind the copy keeps it readable over the neon. */
+.hero-description::before {
+  content: "";
+  position: absolute;
+  inset: -2rem -2.5rem;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(12 10 15 / 0.94) 55%, transparent);
+}
+
+.lever-hint {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 50%;
+  translate: -50% 0;
+  margin: 0;
+  color: var(--neon-amber);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  text-shadow: 0 0 10px var(--bg), 0 0 4px var(--bg);
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
+  pointer-events: none;
+}
+
+.lever-hint[data-visible="true"] {
+  opacity: 1;
+}
+
+/* Only offer the hint once the live cabinet is ready. */
+.cabinet:not([data-live="true"]) ~ .lever-hint {
+  display: none;
+}
+
+.lever-hint::before {
+  display: none;
+}
+
+/* The Blender lever sits higher than the procedural one. */
+.cabinet[data-glb="true"] ~ .lever-hint {
+  --hint-top: 52%;
+}
+
+/* Side-by-side layout: copy left, cabinet centred, hint right beside the lever. */
+@media (min-width: 64rem) and (orientation: landscape) {
+  .hero {
+    --stage-h: 70svh;
+  }
+
+  .hero-layout {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    justify-items: start;
+    gap: var(--space-6);
+    padding: 0 var(--page-gutter) var(--floor);
+  }
+
+  .hero-layout {
+    align-content: end;
+  }
+
+  .hero-stage {
+    margin-bottom: 0;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .hero-description {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    text-align: left;
+    max-width: 28ch;
+  }
+
+  .lever-hint {
+    top: var(--hint-top, 64%);
+    left: calc(100% + var(--space-3));
+    translate: 0 -50%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* The thin line points back at the lever. */
+  .lever-hint::before {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 1px;
+    background: var(--neon-magenta);
+    box-shadow: 0 0 6px var(--neon-magenta);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lever-hint[data-visible="true"]::before {
+    animation: hint-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes hint-pulse {
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .cabinet {
@@ -230,7 +473,7 @@ a {
 }
 
 .lever-trigger:focus {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--neon-cyan);
   outline-offset: -6px;
 }
 
@@ -246,14 +489,14 @@ a {
   max-height: 32%;
   padding: var(--space-3);
   overflow: auto;
-  background: var(--color-bg-raised);
-  color: var(--color-text);
-  border: 1px solid var(--color-line);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
 }
 
 .spin-result:focus {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--neon-cyan);
   outline-offset: 3px;
 }
 
@@ -267,7 +510,7 @@ a {
 }
 
 .spin-result p {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
 }
@@ -291,24 +534,24 @@ a {
 .spin-result button {
   font: inherit;
   font-size: var(--text-sm);
-  color: var(--color-text);
+  color: var(--text);
 }
 
 .spin-result a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
 }
 
 .spin-result a:hover,
 .spin-result a:focus-visible {
-  text-decoration-color: var(--color-text);
+  text-decoration-color: var(--text);
 }
 
 .spin-result button {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
@@ -343,7 +586,7 @@ a {
 }
 
 .section-label {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
@@ -355,7 +598,7 @@ a {
   z-index: 1;
   padding-top: var(--space-4);
   scroll-margin-top: var(--space-5);
-  background: var(--color-bg);
+  background: var(--bg);
 }
 
 .section-label {
@@ -373,7 +616,7 @@ a {
 }
 
 .case-study + .case-study {
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--hairline);
 }
 
 .case-study h2 {
@@ -388,7 +631,7 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
@@ -400,12 +643,12 @@ a {
 
 .case-study a:hover,
 .case-study a:focus-visible {
-  text-decoration-color: var(--color-text);
+  text-decoration-color: var(--text);
 }
 
 .case-study p {
   margin-top: var(--space-2);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .case-study-page {
@@ -429,7 +672,7 @@ a {
 
 .todo {
   margin-top: var(--space-5);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
 }
 
@@ -443,24 +686,24 @@ a {
 }
 
 .back-link a {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .back-link a:hover,
 .back-link a:focus-visible {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .site-footer {
   padding-block: var(--space-7) var(--space-8);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
 }
 
@@ -468,15 +711,15 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .site-footer a:hover,
 .site-footer a:focus-visible {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 /* Case studies. Cream type on the same ground as the rest of the site.
@@ -490,8 +733,8 @@ a {
   position: sticky;
   top: 0;
   z-index: 4;
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-line);
+  background: var(--bg);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .study-bar-inner {
@@ -504,20 +747,20 @@ a {
 }
 
 .study-bar a {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .study-bar a:hover,
 .study-bar a:focus-visible {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .study-bar nav ul {
@@ -539,7 +782,7 @@ a {
   margin-top: var(--space-5);
   padding: 0;
   list-style: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
@@ -561,7 +804,7 @@ a {
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
   margin-top: var(--space-3);
-  color: var(--color-text);
+  color: var(--text);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
 }
@@ -572,7 +815,7 @@ a {
 }
 
 .study-meta dt {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -604,10 +847,10 @@ a {
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--color-bg-glow), var(--color-bg-raised));
-  color: var(--color-text-muted);
+  background: linear-gradient(180deg, var(--bg-glow), var(--surface));
+  color: var(--text-muted);
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -615,7 +858,7 @@ a {
 
 .study-strip figcaption {
   margin-top: var(--space-2);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
 }
@@ -665,13 +908,13 @@ a {
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .study-section a:hover,
 .study-section a:focus-visible {
-  text-decoration-color: var(--color-text);
+  text-decoration-color: var(--text);
 }
 
 .study-section .study-pairs {
@@ -682,7 +925,7 @@ a {
 .study-pairs > li + li {
   margin-top: var(--space-4);
   padding-top: var(--space-4);
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--hairline);
 }
 
 .study-pairs p + p {
@@ -692,7 +935,7 @@ a {
 .study-pair-label {
   display: block;
   margin-bottom: var(--space-1);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: var(--tracking-wide);
@@ -709,7 +952,7 @@ a {
   gap: var(--space-4);
   margin-top: var(--space-8);
   padding-top: var(--space-5);
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--hairline);
 }
 
 .study-reel {
@@ -726,20 +969,20 @@ a {
 }
 
 .study-reel-label {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--text-sm);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-text-muted);
+  text-decoration-color: var(--text-muted);
   transition: color var(--duration-fast) var(--ease-out),
     text-decoration-color var(--duration-fast) var(--ease-out);
 }
 
 .study-reel:hover .study-reel-label,
 .study-reel:focus-visible .study-reel-label {
-  color: var(--color-text);
-  text-decoration-color: var(--color-text);
+  color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .study-reel-title {
@@ -793,7 +1036,7 @@ a {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: var(--color-bg);
+  background: var(--bg);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -803,4 +1046,68 @@ a {
   position: relative;
   z-index: 60;
   opacity: var(--zoom-page, 1);
+}
+
+
+.about-page {
+  padding-block: var(--space-8);
+  color: var(--text-muted);
+}
+
+.about-title {
+  margin-bottom: var(--space-4);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+#case-studies { scroll-margin-top: var(--header-height); }
+
+.about-page > p {
+  max-width: 62ch;
+  margin-bottom: var(--space-4);
+}
+
+.about-lead {
+  color: var(--text);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+
+.about-heading {
+  margin: var(--space-7) 0 var(--space-4);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+.about-experience {
+  display: grid;
+  gap: var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.about-experience li {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.about-experience h3 {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.about-experience p {
+  max-width: 62ch;
+}
+
+.about-place {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
 }
