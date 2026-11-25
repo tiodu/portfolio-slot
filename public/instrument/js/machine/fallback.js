@@ -16,7 +16,7 @@ export function createFallback({ slot, studies, reduced }) {
   el.innerHTML = `
     <div class="fb-body">
       <div class="fb-plate">
-        <div class="fb-name"><span>Eduardo de Souza</span><span>Work selector / 4 studies</span></div>
+        <div class="fb-name"><span>Eduardo de Souza</span><span>Work selector / ${studies.length} studies</span></div>
         <div class="fb-window">
           ${[0, 1, 2].map(() => '<div class="fb-reel"><span class="fb-num">01</span><span class="fb-label">LABEL</span></div>').join('')}
           <i class="fb-payline"></i>
