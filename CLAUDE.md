@@ -9,6 +9,8 @@ Eduardo de Souza's portfolio: a Googie slot-machine hero over a neon Vegas-strip
 - The Next.js app on `main` and the Googie cabinet (PRs #27 to #30) are kept as history. Do not delete those branches or PRs.
 - "Locked decisions" and "Map" below describe the Next.js app. They do not apply to the instrument unless its own PR says so.
 - The portfolio is built from its own design system: tokens first, then components, documented on a `/system` page.
+- Themes (decided 25 Nov 2026): "instrument" (default, the current look), "vegas" and "aero" (Frutiger Aero). Themes are data: one theme object feeds the CSS variables, then the 3D scene.
+- Fonts: Google Fonts families are fine, self-hosted as latin woff2 (from @fontsource, OFL). Never link to Google's CDN: the site promises no tracking.
 
 ## Stack
 - Next.js 16 App Router, React 19, TypeScript. Read `node_modules/next/dist/docs/` before using Next APIs (see AGENTS.md).
@@ -30,7 +32,8 @@ Eduardo de Souza's portfolio: a Googie slot-machine hero over a neon Vegas-strip
 - The result card is a modal for now.
 
 ## Hard rules
-- Outcomes are content, never money. No credits, chips, odds, real-money mechanics, fake near-misses, or real casino branding.
+- Outcomes are content, never money. No credits, balances, odds, real-money mechanics or fake near-misses.
+- Casino-style visuals (chips, dice, cards, neon, starbursts) are allowed as decoration in an opt-in theme such as "vegas". The default theme stays the instrument. No real casino or operator brand marks.
 - Real operator names may appear in case-study copy and diagrams. No operator logos or brand marks unless Eduardo supplies and approves them.
 - No employer logos (WA, Belloa) on the reels. Logos are fine inside case-study pages.
 - Never invent case-study facts, metrics, client names or results. Write `[TODO]` and list the gaps in the PR.
