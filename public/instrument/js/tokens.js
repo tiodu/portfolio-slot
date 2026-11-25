@@ -4,7 +4,8 @@
  * JS animations read these directly; CSS gets them as custom properties
  * (--ease-push, --dur-reveal...) via applyMotionTokens(), so the 3D
  * machine and the DOM always move to the same rhythm.
- * Colour and type tokens live in css/tokens.css; the 3D materials read
+ * Colour, surface and type tokens live in js/themes.js (one object per
+ * theme, written to :root as CSS variables); the 3D materials read
  * those back with getComputedStyle, so the same goes the other way.
  */
 
