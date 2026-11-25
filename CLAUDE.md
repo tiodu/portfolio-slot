@@ -4,6 +4,12 @@ Eduardo de Souza's portfolio: a Googie slot-machine hero over a neon Vegas-strip
 
 @AGENTS.md
 
+## Direction (decided 25 Nov 2026)
+- Eduardo chose the instrument direction (PR #31, `public/instrument/`, no-build, graphite and orange). Work continues from that PR.
+- The Next.js app on `main` and the Googie cabinet (PRs #27 to #30) are kept as history. Do not delete those branches or PRs.
+- "Locked decisions" and "Map" below describe the Next.js app. They do not apply to the instrument unless its own PR says so.
+- The portfolio is built from its own design system: tokens first, then components, documented on a `/system` page.
+
 ## Stack
 - Next.js 16 App Router, React 19, TypeScript. Read `node_modules/next/dist/docs/` before using Next APIs (see AGENTS.md).
 - react-three-fiber, drei, postprocessing, three. leva is for dev and `?tune` only.
@@ -24,7 +30,8 @@ Eduardo de Souza's portfolio: a Googie slot-machine hero over a neon Vegas-strip
 - The result card is a modal for now.
 
 ## Hard rules
-- Outcomes are content, never money. No credits, chips, odds, real-money mechanics, fake near-misses, or real operator or casino branding.
+- Outcomes are content, never money. No credits, chips, odds, real-money mechanics, fake near-misses, or real casino branding.
+- Real operator names may appear in case-study copy and diagrams. No operator logos or brand marks unless Eduardo supplies and approves them.
 - No employer logos (WA, Belloa) on the reels. Logos are fine inside case-study pages.
 - Never invent case-study facts, metrics, client names or results. Write `[TODO]` and list the gaps in the PR.
 - British English in site copy.
