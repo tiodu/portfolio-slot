@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Eduardo de Souza, product design</title>
+  <meta name="description" content="Eduardo de Souza, Product Design Manager moving into design engineering. Four case studies, one lever.">
+  <meta name="theme-color" content="#f1eee8">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d1e20'/%3E%3Crect x='5' y='15' width='22' height='2' fill='%23e5470e'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/site.css">
+  <!-- Three.js pinned, no build step. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body data-view="home" data-state="transitioning">
+  <a class="skip-link" href="#work">Skip to all work</a>
+
+  <!-- The machine. Decorative: everything it says is also in the DOM. -->
+  <div id="stage" aria-hidden="true"></div>
+
+  <header class="bar">
+    <button id="back" class="back" type="button"><span aria-hidden="true">←</span> Back to the machine</button>
+    <a class="bar-name mono" href="#/">Eduardo de Souza</a>
+    <nav class="bar-nav mono" aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="home" class="view-home">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="kicker mono" data-hero>Product Design Manager, moving into design engineering</p>
+          <h1 id="hero-title" class="hero-title" data-hero>Eduardo<br>de&nbsp;Souza</h1>
+          <p class="lede" data-hero>About twelve years in design. I lead a small team at WA&nbsp;Technology, a B2B iGaming platform provider. This machine holds four case studies. Pull the lever to open one.</p>
+        </div>
+
+        <div id="machine-slot" class="machine-slot"></div>
+
+        <div class="hero-actions" data-hero>
+          <button id="spin" class="spin" type="button" aria-describedby="spin-note">
+            <span class="spin-knob" aria-hidden="true"></span>
+            <span class="spin-label">Pull the lever</span>
+          </button>
+          <a class="skip-game mono" href="#work">Skip the game, see all work <span aria-hidden="true">↓</span></a>
+          <p id="spin-note" class="note mono">A UI metaphor, not a casino. No real money. Every pull lands a case study.</p>
+        </div>
+      </section>
+
+      <div class="sheet">
+        <section id="work" class="work" aria-labelledby="work-title">
+          <h2 id="work-title" class="section-label mono" tabindex="-1">All work</h2>
+          <ol id="work-list" class="work-list"></ol>
+        </section>
+
+        <section class="recognition" aria-labelledby="rec-title">
+          <h2 id="rec-title" class="section-label mono">Recognition, WA Technology</h2>
+          <ul class="awards">
+            <li><span class="award-title">Sports Provider of the Year</span><span class="mono">AffPapa, 2024</span></li>
+            <li><span class="award-title">Best Esport Platform</span><span class="mono">SiGMA Africa, 2025</span></li>
+          </ul>
+        </section>
+
+        <section id="about" class="about" aria-labelledby="about-title">
+          <h2 id="about-title" class="section-label mono">About</h2>
+          <div class="about-body">
+            <p class="about-lead">I design B2B products for sportsbook, casino and fantasy, and I lead the small team that does it with me at WA&nbsp;Technology.</p>
+            <p>About twelve years in design. Brazilian, based in Ireland, fully remote. I work in Portuguese, English and Spanish.</p>
+            <p>I am moving from managing design towards building it. This site is the first proof: designed and coded by hand, no template.</p>
+          </div>
+        </section>
+
+        <section id="contact" class="contact" aria-labelledby="contact-title">
+          <h2 id="contact-title" class="section-label mono">Contact</h2>
+          <p class="contact-line">Email <span class="todo">[TODO] email address</span></p>
+          <p class="contact-links mono"><span class="todo">[TODO] LinkedIn</span> <span class="todo">[TODO] Read.cv or CV link</span></p>
+        </section>
+
+        <footer class="foot mono">
+          <p>Built with Three.js and plain JavaScript. No tracking.</p>
+          <p>A UI metaphor, not a casino. No real money, no odds.</p>
+        </footer>
+      </div>
+    </div>
+
+    <div id="case" class="view-case" hidden></div>
+  </main>
+
+  <p id="announcer" class="sr-only" aria-live="polite"></p>
+
+  <noscript>
+    <style>.hero-actions .spin { display: none; }</style>
+    <p class="noscript">The machine needs JavaScript. The case studies are listed under All work.</p>
+  </noscript>
+</body>
+</html>
