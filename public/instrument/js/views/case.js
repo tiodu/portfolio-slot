@@ -28,7 +28,7 @@ export function renderCase(index) {
       <ul class="awards">
         ${awards.map((a) => `<li><span class="award-title">${a.title}</span><span class="mono">${a.by}, ${a.year}</span></li>`).join('')}
       </ul>
-      <p class="cs-note">Awarded to WA Technology. ${todo("Pick'em's part in these awards.")}</p>
+      <p class="cs-note">Won with Pick'em.</p>
     </section>` : '';
 
   return `
@@ -37,13 +37,13 @@ export function renderCase(index) {
       <p class="cs-kicker mono" data-reveal>Case study ${s.n} of 0${studies.length}</p>
       <span class="cs-numeral" data-flip aria-hidden="true">${s.n}</span>
       <h1 id="cs-title" class="cs-title" tabindex="-1" data-reveal>${s.title}</h1>
-      <p class="cs-summary" data-reveal>${todo('One line on what this project changed.')}</p>
+      <p class="cs-summary" data-reveal>${val(s.summary ?? TODO)}</p>
     </header>
 
     <dl class="facts" data-reveal>
-      <div><dt class="mono">Role</dt><dd>${todo()}</dd></div>
-      <div><dt class="mono">Year</dt><dd>${todo()}</dd></div>
-      <div><dt class="mono">Team</dt><dd>${todo()}</dd></div>
+      <div><dt class="mono">Role</dt><dd>${val(s.role ?? TODO)}</dd></div>
+      <div><dt class="mono">Year</dt><dd>${val(s.year ?? TODO)}</dd></div>
+      <div><dt class="mono">Team</dt><dd>${val(s.team ?? TODO)}</dd></div>
       <div><dt class="mono">Platform</dt><dd>${val(s.platform)}</dd></div>
       <div><dt class="mono">Scope</dt><dd>${val(s.scope)}</dd></div>
     </dl>

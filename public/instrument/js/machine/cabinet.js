@@ -43,7 +43,7 @@ function roundedRect(shape, x, y, w, h, r) {
   return shape;
 }
 
-export function buildCabinet(renderer, colors) {
+export function buildCabinet(renderer, colors, count) {
   const d = DIM;
   const group = new THREE.Group();
 
@@ -89,7 +89,7 @@ export function buildCabinet(renderer, colors) {
     x.fillText('EDUARDO DE SOUZA', 0, h * 0.42);
     x.textAlign = 'right';
     x.globalAlpha = 0.62;
-    x.fillText('WORK SELECTOR / 4 STUDIES', w, h * 0.42);
+    x.fillText(`WORK SELECTOR / ${count} STUDIES`, w, h * 0.42);
     x.globalAlpha = 1;
     x.fillRect(0, h - 6, w, 4);
   }, renderer);

@@ -49,7 +49,10 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
   // Build the object.
   const machine = new THREE.Group();
   scene.add(machine);
-  const cabinet = buildCabinet(renderer, colors);
+  if (studies.length * 2 !== DIM.cells) {
+    throw new Error(`The reels have ${DIM.cells} cells (each study twice), so they show ${DIM.cells / 2} studies, not ${studies.length}.`);
+  }
+  const cabinet = buildCabinet(renderer, colors, studies.length);
   machine.add(cabinet.group);
   const cells = cellTextures(studies, renderer, colors, DIM.reelW / DIM.cellArc);
   const reels = createReels({
