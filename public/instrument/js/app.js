@@ -13,8 +13,12 @@ import { studies, bySlug } from './content.js';
 import { renderCase, enterCase, leaveCase } from './views/case.js';
 import { renderIndex } from './views/home.js';
 import { animate, wait } from './motion.js';
+import { initTheme } from './themes.js';
+import { mountThemeSwitch } from './views/theme-switch.js';
 
 applyMotionTokens();
+initTheme();          // before the machine boots: it reads the colours once (slice 2 makes it listen)
+mountThemeSwitch(document.querySelector('#theme-switch'));
 
 const $ = (s) => document.querySelector(s);
 const body = document.body;

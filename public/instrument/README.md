@@ -13,12 +13,17 @@ python3 -m http.server 8000
 # open http://localhost:8000/
 ```
 
-Opening `index.html` from the file system will not work, because ES modules need http. Three.js 0.170.0 loads from jsDelivr through the import map in `index.html`. The fonts are self-hosted in `fonts/` (both OFL).
+Opening `index.html` from the file system will not work, because ES modules need http. Three.js 0.170.0 loads from jsDelivr through the import map in `index.html`. The fonts are self-hosted in `fonts/` as latin woff2 from @fontsource, each with its OFL licence. Never link Google's font CDN: the site promises no tracking.
 
 Query flags for testing:
 
 - `?2d` forces the 2D machine.
 - `?3d` skips the low-power guess (devices with 2 cores or less, 2 GB memory or Save-Data get 2D by default). Reduced motion always gets 2D.
+- `?theme=vegas` (or `instrument`, `aero`) opens in that theme and saves it.
+
+## Themes
+
+Three themes, switchable from the bar: **Instrument** (the default, described below), **Vegas** (night-sky purple, hot pink and cyan neon, bulb yellow, Shrikhand and Jost) and **Aero** (Frutiger Aero: sky to grass gradients, glass panels, gloss, Open Sans). A theme is one object in `js/themes.js`; `site.css` only reads its tokens and never names a theme. The 3D machine reads the colours once at start-up, so it follows the saved theme on load but not a live switch yet.
 
 ## Art direction
 
@@ -37,6 +42,7 @@ Type: Instrument Serif for display, IBM Plex Mono for labels. A warm editorial s
 | File | The one concept |
 | --- | --- |
 | `js/tokens.js`, `css/tokens.css` | Design tokens: every colour, curve and duration has one name |
+| `js/themes.js` | Themes are data: one object per theme, written to `:root` as CSS variables, announced with a `themechange` event |
 | `js/state.js` | A finite state machine: idle, pulled, spinning, settling, landed, transitioning, caseStudy |
 | `js/motion.js` | One animation loop, and tweens you can cancel with an AbortSignal |
 | `js/router.js` | Hash routing: every case study has its own URL |
@@ -48,6 +54,7 @@ Type: Instrument Serif for display, IBM Plex Mono for labels. A warm editorial s
 | `js/machine/textures.js` | Procedural textures, drawn once on a canvas |
 | `js/machine/fallback.js` | Same interface, different engine: the 2D machine |
 | `js/views/case.js` | One template, four fillings, with the shared-element entrance |
+| `js/views/theme-switch.js` | The switcher is built from the theme data: native radios do the keyboard work |
 
 ## Still [TODO]
 
