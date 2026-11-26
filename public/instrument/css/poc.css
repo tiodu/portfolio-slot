@@ -1,0 +1,32 @@
+/* Cabinet POC page only. Everything else comes from tokens.css and site.css. */
+.poc .hero-copy { align-self: center; }
+/* Flat headline for now (no tilt), in the theme's display face. */
+.poc .hero-title { text-wrap: balance; }
+.poc #stage canvas { opacity: 1; }
+
+/* Dev panel: localhost or ?dev only. */
+.dev {
+  position: fixed; right: var(--s-2); bottom: var(--s-2); z-index: 60;
+  min-width: 15rem; max-width: calc(100vw - 2 * var(--s-2));
+  padding: var(--s-2);
+  background: var(--panel); color: var(--ink); border: var(--border); border-radius: var(--radius-sm);
+  backdrop-filter: var(--panel-filter); -webkit-backdrop-filter: var(--panel-filter);
+  font-size: 0.75rem; text-transform: none;
+}
+.dev details { display: grid; gap: var(--s-1); }
+.dev details[open] > summary { margin-bottom: var(--s-1); }
+.dev summary { cursor: pointer; min-height: 24px; }
+.dev dl { display: grid; grid-template-columns: auto auto; gap: 0.15rem var(--s-2); margin: 0; }
+.dev dt { color: var(--ink-2); }
+.dev dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.dev button {
+  min-height: 36px; padding: 0 0.9rem; cursor: pointer;
+  border: var(--border); border-radius: 999px; background: var(--button-fill); color: var(--button-ink);
+  font: 500 0.75rem var(--font-label);
+}
+.dev button:disabled { cursor: progress; opacity: 0.6; }
+.dev output { white-space: pre-line; }
+@media (max-width: 899px) {
+  /* Left edge, mid-screen: clear of the headline, the lever and the button. */
+  .dev { right: auto; left: var(--s-1); bottom: auto; top: 44svh; min-width: 0; padding: var(--s-1); font-size: 0.6875rem; }
+}

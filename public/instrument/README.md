@@ -23,7 +23,9 @@ Query flags for testing:
 
 ## Themes
 
-Three themes, switchable from the bar: **Instrument** (the default, described below), **Vegas** (night-sky purple, hot pink and cyan neon, bulb yellow, Shrikhand and Jost) and **Aero** (Frutiger Aero: sky to grass gradients, glass panels, gloss, Open Sans). A theme is one object in `js/themes.js`; `site.css` only reads its tokens and never names a theme. The 3D machine reads the colours once at start-up, so it follows the saved theme on load but not a live switch yet.
+Three themes, switchable from the bar: **Instrument** (the default, described below), **Vegas** (night-sky purple, hot pink and cyan neon, bulb yellow, Shrikhand and Jost) and **Aero** (Frutiger Aero: sky to grass gradients, glass panels, gloss, Open Sans). A theme is one object in `js/themes.js`; `site.css` only reads its tokens and never names a theme. The 3D machine follows a live switch: it listens for `themechange` and, once idle, rebuilds the cabinet from the theme's `cabinet` spec.
+
+`poc.html` is the cabinet POC page (see `docs/cabinet-poc/`): the shared stage, the switcher, a headline and, on localhost or with `?dev`, a dev panel with FPS, GPU counts and a "switch x50" leak test.
 
 ## Art direction
 
@@ -50,7 +52,7 @@ Type: Instrument Serif for display, IBM Plex Mono for labels. A warm editorial s
 | `js/machine/stage.js` | One camera, one number: the whole dolly is driven by `blend` (0 home, 1 inside the reel) |
 | `js/machine/reels.js` | Velocity-matched easing: reels slow down from exactly the speed they were spinning at |
 | `js/machine/lever.js` | A damped spring, which is where the weight and overshoot come from |
-| `js/machine/cabinet.js` | A designed object from a few honest parts |
+| `js/machine/cabinet.js` | A build is a pure function of a spec: a fixed core plus themeable slots, with `dispose()` |
 | `js/machine/textures.js` | Procedural textures, drawn once on a canvas |
 | `js/machine/fallback.js` | Same interface, different engine: the 2D machine |
 | `js/views/case.js` | One template, four fillings, with the shared-element entrance |

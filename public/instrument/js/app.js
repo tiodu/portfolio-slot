@@ -17,7 +17,7 @@ import { initTheme } from './themes.js';
 import { mountThemeSwitch } from './views/theme-switch.js';
 
 applyMotionTokens();
-initTheme();          // before the machine boots: it reads the colours once (slice 2 makes it listen)
+initTheme();          // before the machine boots, so it builds the saved theme first
 mountThemeSwitch(document.querySelector('#theme-switch'));
 
 const $ = (s) => document.querySelector(s);
@@ -129,6 +129,7 @@ const machineReady = (async () => {
       machine = await createStage({
         mount: els.stage, slot: els.slot, studies,
         onLeverPull: ({ manual }) => spin({ manual }),
+        canRebuild: () => fsm.is('idle'),   // a theme switch waits until no journey is running
       });
       body.dataset.engine = 'webgl';
       syncStage();

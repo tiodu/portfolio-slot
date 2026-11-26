@@ -11,11 +11,12 @@
  * so each face gets its own high resolution texture.
  */
 import * as THREE from 'three';
-import { DIM } from './cabinet.js';
+import { CORE } from './cabinet.js';
+import { disposeAll } from './dispose.js';
 import { dur } from '../tokens.js';
 import { smoothstep } from '../motion.js';
 
-const N = DIM.cells;
+const N = CORE.cells;
 const STEP = (Math.PI * 2) / N;
 const VMAX = 15;                 // rad/s at full spin
 const K = [3, 3.6, 4.4];         // ease-out power per reel
@@ -30,7 +31,7 @@ function landingAngle(study, atLeast) {
 }
 
 function segmentGeometry(k) {
-  const g = new THREE.CylinderGeometry(DIM.R, DIM.R, DIM.reelW, 28, 1, true, k * STEP - STEP / 2, STEP);
+  const g = new THREE.CylinderGeometry(CORE.R, CORE.R, CORE.reelW, 28, 1, true, k * STEP - STEP / 2, STEP);
   // Swap UVs so the texture runs around the reel, top of cell first.
   const uv = g.attributes.uv;
   for (let i = 0; i < uv.count; i++) { const u = uv.getX(i), v = uv.getY(i); uv.setXY(i, v, 1 - u); }
@@ -40,22 +41,22 @@ function segmentGeometry(k) {
 
 export function createReels({ textures, blur, colors, onStop }) {
   const root = new THREE.Group();
-  root.position.set(0, DIM.winY, DIM.reelZ);
+  root.position.set(0, CORE.winY, CORE.reelZ);
 
   const faces = textures.map((map) => new THREE.MeshStandardMaterial({
     map, color: '#c4c4c4', roughness: 0.6, metalness: 0, emissive: '#ffffff', emissiveMap: map, emissiveIntensity: 0.12,
   }));
   const geos = Array.from({ length: N }, (_, k) => segmentGeometry(k));
   const blurGeo = (() => {
-    const g = new THREE.CylinderGeometry(DIM.R * 1.003, DIM.R * 1.003, DIM.reelW, 64, 1, true, -STEP / 2, Math.PI * 2);
+    const g = new THREE.CylinderGeometry(CORE.R * 1.003, CORE.R * 1.003, CORE.reelW, 64, 1, true, -STEP / 2, Math.PI * 2);
     const uv = g.attributes.uv;
     for (let i = 0; i < uv.count; i++) { const u = uv.getX(i), v = uv.getY(i); uv.setXY(i, v, 1 - u); }
     return g.rotateZ(-Math.PI / 2);
   })();
   const capMat = new THREE.MeshStandardMaterial({ color: colors.graphite, roughness: 0.5, metalness: 0.4 });
-  const capGeo = new THREE.CircleGeometry(DIM.R * 0.995, 48);
+  const capGeo = new THREE.CircleGeometry(CORE.R * 0.995, 48);
 
-  const reels = DIM.reelXs.map((x, i) => {
+  const reels = CORE.reelXs.map((x, i) => {
     const g = new THREE.Group();
     g.position.x = x;
     geos.forEach((geo, k) => g.add(new THREE.Mesh(geo, faces[k % faces.length])));
@@ -66,7 +67,7 @@ export function createReels({ textures, blur, colors, onStop }) {
     for (const side of [-1, 1]) {
       const cap = new THREE.Mesh(capGeo, capMat);
       cap.rotation.y = side * Math.PI / 2;
-      cap.position.x = side * DIM.reelW / 2;
+      cap.position.x = side * CORE.reelW / 2;
       g.add(cap);
     }
     root.add(g);
@@ -153,6 +154,10 @@ export function createReels({ textures, blur, colors, onStop }) {
 
   return {
     root, update, spin, snap, show, nudge,
+    // Where each reel rests (a nudge in flight counts as done), and back again.
+    pose: () => reels.map((r) => (r.mode === 'nudge' ? r.to : r.phi)),
+    restore(phis) { reels.forEach((r, i) => { r.phi = r.prev = phis[i]; r.mode = 'rest'; r.g.rotation.x = r.phi; }); },
+    dispose() { disposeAll([root]); },
     get busy() { return reels.some((r) => r.mode !== 'rest' && r.mode !== 'nudge'); },
     firstStopped: () => reels.some((r) => r.mode === 'bounce' || (r.mode === 'rest' && r.speed === 0)),
   };

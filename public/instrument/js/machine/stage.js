@@ -8,21 +8,34 @@
  *
  * Distance is interpolated in log space, so the dolly reads as a steady
  * push at every scale instead of rushing at the start.
+ *
+ * Concept: subscribe, do not copy.
+ * The stage listens for "themechange" instead of keeping the colours it
+ * read at start-up. When the machine is idle it loads the new theme's
+ * assets, throws the old cabinet, reels and lever away (dispose), reads
+ * the colours again and builds new ones from the theme's cabinet spec,
+ * carrying the reels' positions and the lit indicator across.
  */
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { buildCabinet, DIM } from './cabinet.js';
+import { buildCabinet, CORE } from './cabinet.js';
 import { createReels } from './reels.js';
 import { createLever } from './lever.js';
 import { readColors, cellTextures, blurStrip } from './textures.js';
-import { addTick, tween, lerp, clamp, smoothstep } from '../motion.js';
+import { ensureThemeAssets } from './assets.js';
+import { themes, currentTheme } from '../themes.js';
+import { addTick, tween, lerp, clamp, smoothstep, animate } from '../motion.js';
 import { dur, easeFn } from '../tokens.js';
 
 const FOV = 26;
 const HOME_YAW = -0.3;    // three-quarter view, lever side towards you
 
-export async function createStage({ mount, slot, studies, onLeverPull, onReelStop }) {
-  const colors = readColors();
+/* canRebuild: the app can hold a theme rebuild back (say, while a landed
+   case study is about to open). The stage also waits for its own idle. */
+export async function createStage({ mount, slot, studies, onLeverPull, onReelStop, canRebuild = () => true }) {
+  let theme = themes[currentTheme()];
+  await ensureThemeAssets(theme);
+  let colors = readColors();
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.NeutralToneMapping;
@@ -49,26 +62,31 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
   // Build the object.
   const machine = new THREE.Group();
   scene.add(machine);
-  if (studies.length * 2 !== DIM.cells) {
-    throw new Error(`The reels have ${DIM.cells} cells (each study twice), so they show ${DIM.cells / 2} studies, not ${studies.length}.`);
+  if (studies.length * 2 !== CORE.cells) {
+    throw new Error(`The reels have ${CORE.cells} cells (each study twice), so they show ${CORE.cells / 2} studies, not ${studies.length}.`);
   }
-  const cabinet = buildCabinet(renderer, colors, studies.length);
-  machine.add(cabinet.group);
-  const cells = cellTextures(studies, renderer, colors, DIM.reelW / DIM.cellArc);
-  const reels = createReels({
-    textures: cells.textures,
-    blur: blurStrip(cells.canvases, renderer, DIM.cells),
-    colors,
-    onStop: (i) => { kickVel += 0.12; onReelStop?.(i); },
-  });
-  cabinet.group.add(reels.root);
-  const lever = createLever({ materials: cabinet.materials, accent: colors.accent });
-  cabinet.group.add(lever.pivot);
+  let cabinet, cells, reels, lever;
+  // One cabinet from the theme's spec, with the core's reels and lever on it.
+  function assemble() {
+    cabinet = buildCabinet(renderer, theme.cabinet, colors, studies.length);
+    machine.add(cabinet.group);
+    cells = cellTextures(studies, renderer, colors, CORE.reelW / CORE.cellArc);
+    reels = createReels({
+      textures: cells.textures,
+      blur: blurStrip(cells.canvases, renderer, CORE.cells),
+      colors,
+      onStop: (i) => { kickVel += 0.12; onReelStop?.(i); },
+    });
+    cabinet.group.add(reels.root);
+    lever = createLever({ materials: cabinet.materials, accent: colors.accent, spec: theme.cabinet?.lever });
+    cabinet.group.add(lever.pivot);
+    // Upload every texture now, so the first spin never stalls on the GPU.
+    renderer.compile(scene, camera);
+    cells.textures.forEach((t) => renderer.initTexture(t));
+  }
+  assemble();
   reels.show([3, 0, 1]);
   let study = 0;                       // the study on the middle reel, for framing
-  // Upload every texture now, so the first spin never stalls on the GPU.
-  renderer.compile(scene, camera);
-  cells.textures.forEach((t) => renderer.initTexture(t));
 
   // ------------------------------------------------------------------ view
   const view = {
@@ -101,7 +119,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
     const s = slotRect && !centred
       ? slotRect
       : { left: size.w * 0.08, top: size.h * 0.1, width: size.w * 0.84, height: size.h * 0.8 };
-    const f = DIM.frame;
+    const f = CORE.frame;
     const dH = f.h / (2 * tanHalf * (s.height * 0.94 / size.h));
     const dW = f.w / (2 * tanHalf * camera.aspect * (s.width * 0.96 / size.w));
     return {
@@ -116,11 +134,11 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
   // that the numeral crops (that happens first in portrait).
   function insidePose() {
     const box = cells.boxes[study];
-    const numW = box.w * DIM.reelW, numH = box.h * DIM.cellArc;
-    const cover = Math.min(DIM.cellArc / (2 * tanHalf), DIM.reelW / (2 * tanHalf * camera.aspect)) * 0.98;
+    const numW = box.w * CORE.reelW, numH = box.h * CORE.cellArc;
+    const cover = Math.min(CORE.cellArc / (2 * tanHalf), CORE.reelW / (2 * tanHalf * camera.aspect)) * 0.98;
     const fit = Math.max(numH / (2 * tanHalf * 0.86), numW / (2 * tanHalf * camera.aspect * 0.86));
-    const faceY = DIM.winY + DIM.cellArc * (0.5 - (box.y + box.h / 2));
-    return { target: tmpB.set(0, faceY, DIM.reelFront), dist: Math.max(cover, fit) };
+    const faceY = CORE.winY + CORE.cellArc * (0.5 - (box.y + box.h / 2));
+    return { target: tmpB.set(0, faceY, CORE.reelFront), dist: Math.max(cover, fit) };
   }
 
   function applyCamera() {
@@ -175,7 +193,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
   }
 
   canvas.addEventListener('pointerdown', (e) => {
-    if (view.blend > 0.05 || !hitLever(e)) return;
+    if (view.blend > 0.05 || swapping || !hitLever(e)) return;
     e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
     drag = { id: e.pointerId, y0: screenY(lever.knobWorld(0)), y1: screenY(lever.knobWorld(1)), startY: e.clientY, fired: false, t: performance.now() };
@@ -261,6 +279,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
       renderer.render(scene, camera);
       dirty = false;
     }
+    trySwap();
   }
 
   function setActive(on) {
@@ -276,6 +295,25 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
   applyCamera();
   renderer.render(scene, camera);
 
+  async function spinNow(target, { signal, manual, onSpin, onSettle }) {
+    cabinet.setLed(-1);
+    if (!manual) await lever.pull(dur.leverHold);
+    if (signal?.aborted) return false;
+    kickVel += 0.45;
+    onSpin?.();
+    let settled = false;
+    study = target;
+    const done = reels.spin(target);
+    const onAbort = () => reels.snap(target);
+    signal?.addEventListener('abort', onAbort, { once: true });
+    const off = addTick(() => { if (!settled && reels.firstStopped()) { settled = true; onSettle?.(); } });
+    const ok = await done;
+    off();
+    signal?.removeEventListener('abort', onAbort);
+    if (ok) cabinet.setLed(target);
+    return ok && !signal?.aborted;
+  }
+
   // ------------------------------------------------------------ public API
   function tweenView(prop, to, duration, easing, signal) {
     const from = view[prop];
@@ -283,38 +321,98 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
     // Shorter if we are already part of the way there (interrupted).
     const d = duration * Math.max(0.35, Math.abs(to - from));
     dirty = true;
-    return tween(d, easing, (e) => { view[prop] = lerp(from, to, e); dirty = true; }, signal);
+    tweening++;
+    return tween(d, easing, (e) => { view[prop] = lerp(from, to, e); dirty = true; }, signal)
+      .finally(() => { tweening--; trySwap(); });
+  }
+
+  // ---------------------------------------------------------- live theme
+  let pending = null;      // the newest theme asked for: the latest one wins
+  let swapping = null;     // the rebuild in flight
+  let pulling = false;     // inside pullAndSpin
+  let tweening = 0;        // camera tweens running
+  const waiters = [];
+
+  // Home view, reels not spinning, no camera move, nobody on the lever.
+  const idle = () => view.blend < 0.001 && !pulling && tweening === 0 && !drag
+    && !reels.busy && !lever.busy && canRebuild();
+
+  function onThemeChange(e) {
+    pending = e.detail.theme;
+    trySwap();
+  }
+  document.addEventListener('themechange', onThemeChange);
+
+  function trySwap() {
+    if (pending && !swapping && idle()) {
+      const next = pending;
+      pending = null;
+      swapping = swap(next).finally(() => { swapping = null; trySwap(); });
+    }
+    if (!pending && !swapping) waiters.splice(0).forEach((resolve) => resolve());
+  }
+
+  async function swap(next) {
+    if (next.name === theme.name) return;
+    await ensureThemeAssets(next);
+    // A short canvas fade hides the rebuild. Reduced motion: an instant swap.
+    const fade = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (fade) await animate(canvas, [{ opacity: 1 }, { opacity: 0 }], { duration: dur.canvasFade / 2, easing: 'ease-out', fill: 'forwards' });
+
+    const keep = { angles: reels.pose(), led: cabinet.led };
+    machine.remove(cabinet.group);
+    lever.dispose();
+    reels.dispose();
+    cabinet.dispose();
+
+    theme = next;
+    colors = readColors();
+    renderer.setClearColor(colors.paper, 1);
+    assemble();
+    reels.restore(keep.angles);
+    cabinet.setLed(keep.led);
+    applyCamera();
+    renderer.render(scene, camera);
+    dirty = true;
+
+    if (fade) await animate(canvas, [{ opacity: 0 }, { opacity: 1 }], { duration: dur.canvasFade / 2, easing: 'ease-in' });
+    canvas.getAnimations().forEach((a) => a.cancel());
   }
 
   return {
     canvas,
     setActive,
     get blend() { return view.blend; },
+    get theme() { return theme.name; },
+    get fits() { return cabinet.fits; },
+    setLed: (i) => { cabinet.setLed(i); dirty = true; },
+
+    // Resolves once no theme switch is waiting or rebuilding.
+    settled() { return new Promise((resolve) => { waiters.push(resolve); trySwap(); }); },
+
+    // What the GPU holds, for the dev panel's leak test.
+    stats() {
+      const { render, memory, programs } = renderer.info;
+      return { calls: render.calls, triangles: render.triangles, geometries: memory.geometries, textures: memory.textures, programs: programs?.length ?? 0 };
+    },
 
     async pullAndSpin(target, { signal, manual, onSpin, onSettle } = {}) {
       setActive(true);
-      cabinet.setLed(-1);
-      if (!manual) await lever.pull(dur.leverHold);
-      if (signal?.aborted) return false;
-      kickVel += 0.45;
-      onSpin?.();
-      let settled = false;
-      study = target;
-      const done = reels.spin(target);
-      const onAbort = () => reels.snap(target);
-      signal?.addEventListener('abort', onAbort, { once: true });
-      const off = addTick(() => { if (!settled && reels.firstStopped()) { settled = true; onSettle?.(); } });
-      const ok = await done;
-      off();
-      signal?.removeEventListener('abort', onAbort);
-      if (ok) cabinet.setLed(target);
-      return ok && !signal?.aborted;
+      pulling = true;
+      try {
+        if (swapping) await swapping;       // never spin a cabinet that is being thrown away
+        return await spinNow(target, { signal, manual, onSpin, onSettle });
+      } finally {
+        pulling = false;
+        trySwap();
+      }
     },
 
     pushIn(signal) {
       setActive(true);
       return tweenView('blend', 1, dur.dolly, easeFn.push, signal);
     },
+
 
     async pullOut(signal, { centred = false } = {}) {
       setActive(true);
@@ -339,13 +437,13 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
       machine.updateMatrixWorld(true);
       camera.updateMatrixWorld();      // project() reads matrixWorldInverse
       const b = cells.boxes[study];
-      const R = DIM.R;
+      const R = CORE.R;
       // Top-left and bottom-right of the numeral's line box, on the curved face.
-      const a0 = (0.5 - b.y) * DIM.cellArc / R, a1 = (0.5 - b.y - b.h) * DIM.cellArc / R;
+      const a0 = (0.5 - b.y) * CORE.cellArc / R, a1 = (0.5 - b.y - b.h) * CORE.cellArc / R;
       const pts = [
-        [-DIM.reelW / 2 + b.x * DIM.reelW, a0], [-DIM.reelW / 2 + (b.x + b.w) * DIM.reelW, a1],
+        [-CORE.reelW / 2 + b.x * CORE.reelW, a0], [-CORE.reelW / 2 + (b.x + b.w) * CORE.reelW, a1],
       ].map(([x, a]) => {
-        const v = new THREE.Vector3(x, DIM.winY + R * Math.sin(a), DIM.reelZ + R * Math.cos(a));
+        const v = new THREE.Vector3(x, CORE.winY + R * Math.sin(a), CORE.reelZ + R * Math.cos(a));
         cabinet.group.localToWorld(v);
         v.project(camera);
         return { x: (v.x * 0.5 + 0.5) * size.w, y: (-v.y * 0.5 + 0.5) * size.h };
@@ -355,6 +453,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
 
     destroy() {
       setActive(false);
+      document.removeEventListener('themechange', onThemeChange);
       ro.disconnect();
       scene.traverse((o) => {
         o.geometry?.dispose();
