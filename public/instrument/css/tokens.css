@@ -1,11 +1,14 @@
 /*
- * Colour and type tokens. The 3D materials read these too, so the paper
- * on the reels is the paper of the page and the accent on the payline is
- * the accent on the focus ring. Motion tokens are written here by
- * js/tokens.js at start-up (the values below are only fallbacks).
+ * Type scale, space and motion fallbacks, plus the @font-face rules.
  *
- * Pairing: Instrument Serif is warm and editorial against a cold,
- * machined object; IBM Plex Mono reads like the engraving on it.
+ * Colour, surface and type-family tokens are NOT authored here: they live
+ * in js/themes.js, one object per theme, and applyTheme() writes them to
+ * :root. The block marked "fallback" below is a copy of the "instrument"
+ * theme so the first paint and no-JS visitors still get the default look.
+ * On localhost, js/themes.js warns in the console if the copy drifts.
+ *
+ * Pairing (instrument): Instrument Serif is warm and editorial against a
+ * cold, machined object; IBM Plex Mono reads like the engraving on it.
  */
 
 @font-face {
@@ -29,21 +32,90 @@
   font-weight: 500; font-style: normal; font-display: swap;
 }
 
+@font-face {
+  font-family: "Shrikhand";
+  src: url("../fonts/shrikhand-latin-400-normal.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Jost";
+  src: url("../fonts/jost-latin-400-normal.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Jost";
+  src: url("../fonts/jost-latin-500-normal.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/open-sans-latin-300-normal.woff2") format("woff2");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/open-sans-latin-400-normal.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/open-sans-latin-600-normal.woff2") format("woff2");
+  font-weight: 500 600; font-style: normal; font-display: swap;
+}
+
 :root {
-  /* Colour: paper, ink, one signal accent. Graphite and aluminium are the machine. */
+  /* Fallback: a copy of themes.instrument.tokens in js/themes.js. Edit there first. */
   --paper: #f1eee8;
   --paper-2: #e6e2da;
   --ink: #141414;
-  --ink-2: #55524c;          /* secondary text, 6.7:1 on paper */
+  --ink-2: #55524c;
   --rule: rgba(20, 20, 20, 0.16);
-  --accent: #e5470e;         /* signal orange: payline, knob, focus. Not used for small text */
-  --accent-ink: #b3350a;     /* accent dark enough for text, 4.8:1 on the [TODO] tint */
+  --accent: #e5470e;
+  --accent-ink: #b3350a;
+  --accent-2: #e5470e;
+  --accent-3: #e5470e;
   --graphite: #1d1e20;
   --alu: #deded9;
-
-  /* Type */
+  --surface-fill: var(--paper);
+  --panel: color-mix(in srgb, var(--paper) 88%, transparent);
+  --panel-filter: blur(8px);
+  --border: 1px solid var(--rule);
+  --radius: 0px;
+  --radius-sm: 3px;
+  --shadow: none;
+  --bar-fill: transparent;
+  --bar-filter: none;
+  --bar-edge: none;
+  --hero-fill: transparent;
+  --hero-border: none;
+  --hero-filter: none;
+  --hero-pad: 0px;
+  --button-fill: var(--ink);
+  --button-ink: var(--paper);
+  --button-hover: #000;
+  --knob: radial-gradient(circle at 35% 30%, #ff8a5c 0 18%, var(--accent) 45%, #a8300a 100%);
+  --display-ink: var(--ink);
+  --glow: none;
+  --glow-2: none;
+  --ornament: none;
+  --divider: none;
+  --label-mark: none;
   --font-display: "Instrument Serif", "Times New Roman", serif;
+  --font-body: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-label: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-lead: var(--font-display);
+  --display-weight: 400;
+  --display-scale: 1;
+  --display-leading: 1;
+  --display-tracking: 0em;
+  --quote-style: italic;
+  --label-tracking: 0.04em;
+  --label-case: uppercase;
+
+  /* Not themed yet: the 2D machine's label face (slice 2). */
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  /* Type scale */
   --text-mono: 0.8125rem;
   --text-body: 1.0625rem;
   --text-lead: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem);
