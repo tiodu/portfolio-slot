@@ -52,9 +52,27 @@ For `swiss`, `vegas`, `command` and `aero`. Command is the Eva-inspired render: 
 
 Case study transitions, the work list, the /system page, real copy, production, the tilted headline (`display-tilt` is deferred), ASCII, Pixel, Clay, Spotlight, Mission Control, test automation, any change to eduardodesouza.me.
 
+## Cabinet anatomy
+
+Every cabinet is a fixed core plus themeable slots. The core is constants in code, not theme fields. A theme only fills slots, with parts from a small library (arch, bulb ring, chamfered plate, guard, grille and so on). The builder knows slots and parts, never theme names.
+
+| Fixed core (every theme) | Themeable slots (the theme fills them) |
+|---|---|
+| Reel window: position and size | Body silhouette outside the window: sides, depth, chamfers or corner radius |
+| Three reels: radius, symbols, spin logic | Top: flat, arch, crown |
+| Lever on the right, same pivot and travel | Lever knob and any guard |
+| Four indicator slots that code can drive (`setLed`), one per case | How each indicator looks: lamps, bulbs, strips, or printed numbered cells (Swiss) |
+| Payline and glass over the reels | Base: feet, marquee |
+| Label zones: where titles and numbers go | Finish, trim, decals, lights |
+| An envelope: max height, width and depth, so the arch, crown and bubble fit the default camera frame and the phone crop | Extras: speaker grille, side panels |
+
+The core only guarantees that there are four indicators, in a known order, and that each can be switched on and off. It never dictates their look.
+
+The envelope starts as today's cabinet bounds, extracted as constants in slice 1. A later slice that needs more room asks first.
+
 ## How it is built
 
-1. **Cabinet as data.** Each theme gets a `cabinet` block in `themes.js`: body dimensions and corner radius, top shape (`flat` or `arch`), finish preset, trim, decal set, light rig, base, lever style (including the guard for Command). `buildCabinet(renderer, spec, colors, count)` returns the group plus a `dispose()`. Concept: a build is a pure function of a spec. The builder never branches on a theme name. Everything that differs comes from the spec.
+1. **Cabinet as data.** Each theme gets a `cabinet` block in `themes.js` that fills the slots in the anatomy above: body silhouette, top (`flat` or `arch`), finish, trim, decals, lights, base, indicator style, lever accessory (including the guard for Command). The fixed core stays in code. `buildCabinet(renderer, spec, colors, count)` returns the group plus a `dispose()`. Concept: a build is a pure function of a spec. The builder never branches on a theme name. Everything that differs comes from the spec.
 2. **Reel window is a constant.** `reelWindow` belongs to the stage, not to a theme. The body spec is expressed around it. Extra height (the Vegas arch, a Command crown, a marquee) grows above or around the window, so it stays in the same place and size in every theme. It is the zoom target for the case study transition later.
 3. **Live switching.** The stage subscribes to `themechange`. It waits until idle (reels not spinning, no camera move, home view), loads the new theme's assets, disposes the old cabinet's geometry, materials and textures, reads colours again, resets the clear colour, builds the new cabinet and carries over the reels and lever state. A short canvas fade hides the swap. Reduced motion swaps instantly. Concept: subscribe, do not copy.
 4. **Lazy assets.** Each theme loads only its own fonts, bitmaps and any theme-specific builder module (via dynamic `import()`), only when it is selected. `ensureThemeAssets(theme)` resolves before the rebuild. The default theme loads with the page. Procedural canvas textures cost no download but count towards the GPU texture total in the leak test.
@@ -100,6 +118,8 @@ Cut before extending.
 - Each theme is distinct at a glance.
 - Any theme that needs its own model, not parameters, gets cut.
 - The reel window sits in the same place and size in every theme.
+- All four indicator slots respond to `setLed` in every theme, and the lever works.
+- Every theme's cabinet sits inside the envelope and the default camera frame at 1440 and 390. Checked by eye and noted in the PR.
 - The headline is readable in every theme, including where it overlaps the circle. Checked by eye and noted in the PR.
 - Each theme loads its own assets only when it is selected (check in the network tab).
 - Desktop and mobile widths, keyboard navigation and reduced motion all checked, and the checks reported honestly.
@@ -115,6 +135,7 @@ Cut before extending.
 ## Decisions made
 
 - Four themes ship. Swiss is the default. Instrument is the slice 1 parity baseline only and exits in slice 2.
+- Cabinet is a fixed core plus themeable slots. Indicator style is fully themeable (Swiss can use its printed numbered cells).
 - Separate `poc.html`.
 - Headline flat for now. `display-tilt` deferred.
 - Self-hosted OFL fonts.

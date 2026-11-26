@@ -19,6 +19,7 @@ Verify these in the code before changing anything, and say if any is wrong:
 - Nothing in `js/machine/` listens for `themechange`. Only `js/views/theme-switch.js` does.
 - `js/machine/textures.js` draws the reel faces, labels, brushed metal and decals on canvases at start-up, with fixed font constants.
 - `buildCabinet(renderer, colors, count)` in `cabinet.js` has its dimensions and finishes hard-coded.
+- `setLed` in `cabinet.js` drives the four case indicators.
 - PR #35 is merged, so `js/themes.js` is on main.
 
 ## Before you change anything
@@ -28,9 +29,9 @@ Take Instrument "before" screenshots from main, at a desktop viewport and a phon
 ## Work
 
 1. **`poc.html`**, next to `index.html`. A thin page: the stage (shared `js/machine/stage.js`), the theme switcher, the headline "Ideas into Play" (flat, no tilt, [TODO] placeholder copy) and the dev panel. Reuse `css/tokens.css` and what is cheap from `css/site.css`. Do not refactor `site.css`. No circle yet (slice 2).
-2. **Spec in the themes.** Add a `cabinet` block to each of Instrument, Vegas and Aero in `js/themes.js`. Fields: `body` (width, height, depth, radius), `top` (`flat` or `arch`, rise), `finish` (preset), `trim`, `decals`, `lights`, `base`, `lever` (knob style, guard). In this slice all three themes use the same geometry values as today. Only implement what the current cabinet already does. Reserve the rest with documented defaults. Do not build the arch, the guard or any new geometry.
-3. **Reel window as a constant.** Pull the reel window's position and size out into a stage constant (`reelWindow`). The body spec is expressed around it. It is not a theme field. Later, the arch and crown grow above it.
-4. **Pure builder.** Change `buildCabinet` to take the spec and return `{ group, ..., dispose }`. `dispose()` frees every geometry, material and texture it created. The builder never branches on a theme name. Everything that differs comes from the spec.
+2. **Slots in the themes.** Add a `cabinet` block to each of Instrument, Vegas and Aero in `js/themes.js`. It fills the slots only: `body` (silhouette outside the reel window: width, height, depth, radius), `top` (`flat` or `arch`, rise), `finish` (preset), `trim`, `decals`, `lights`, `base`, `indicators` (style only), `lever` (knob style, guard). In this slice all three themes use the same values as today. Only implement what the current cabinet already does. Reserve the rest with documented defaults. Do not build the arch, the guard or any new geometry.
+3. **Fixed core as constants.** Extract what every cabinet shares into constants in code, not theme fields: `reelWindow` (position and size), the three reels, the lever pivot and travel, four indicator slots (`setLed` drives them; how each one looks is the theme's business), the payline and glass, the label zones, and an `envelope` (max height, width and depth) taken from today's cabinet bounds, so later slices know the room they have. The body spec is expressed around the reel window. Later, the arch and crown grow above it, inside the envelope.
+4. **Pure builder.** Change `buildCabinet` to take the spec and return `{ group, ..., dispose }`. `dispose()` frees every geometry, material and texture it created. The builder never branches on a theme name. Everything that differs comes from the slots. The cabinet is built from the core plus the theme's slots, using parts from a small registry (for now, only the parts today's cabinet uses; later slices add the arch, bulb ring, plates and guard).
 5. **Asset hook.** Add `ensureThemeAssets(theme)`, which resolves when the theme's fonts (and later its bitmaps and builder module) are ready. Each theme loads only its own assets, only when selected. For now it awaits the theme's fonts. Reel and label textures are redrawn only after it resolves.
 6. **Live rebuild.** On `themechange`, wait until the machine is idle (home view, reels not spinning, no camera move). Then `ensureThemeAssets`, dispose the old cabinet, read colours again, set the clear colour, rebuild the cabinet and textures, and re-attach the reels and lever with their current state (symbols, LED). If a switch arrives while busy, the latest one wins when it goes idle. A short canvas fade hides the swap (reuse the existing `canvasFade` duration). Under reduced motion the swap is instant.
 7. **Dev panel** (localhost or `?dev`): FPS, draw calls, triangles, geometry and texture counts from `renderer.info`, and a "switch x50" button that cycles themes 50 times and reports the counts before and after.
@@ -42,6 +43,7 @@ Take Instrument "before" screenshots from main, at a desktop viewport and a phon
 - **Frame rate:** open the Vercel preview on a phone and read FPS in the dev panel. Eduardo does this one.
 - **Headline:** check readability by eye in each theme and note it in the PR.
 - **Lazy assets:** in the network tab, an unselected theme's fonts are not requested until it is selected.
+- **Indicators and envelope:** pull the lever in each theme and see the matching case indicator light. Each cabinet sits inside the envelope and the default camera frame at 1440 and 390.
 - **Also check:** desktop and mobile widths, keyboard navigation (the theme switcher by arrow keys), reduced motion, and that `index.html` still loads and switches.
 
 ## Acceptance criteria
@@ -51,7 +53,8 @@ Take Instrument "before" screenshots from main, at a desktop viewport and a phon
 - After "switch x50", geometry and texture counts are back to the baseline.
 - The reel window sits in the same place and size in every theme.
 - The page paints the saved theme on first load as it does now (the inline script in `index.html`), with no flash of the wrong cabinet.
-- Pulling the lever works after a switch.
+- Pulling the lever works after a switch, and all four indicator slots respond to `setLed` in every theme.
+- The cabinet sits inside the envelope in every theme.
 - `prefers-reduced-motion` gives an instant swap, no fade.
 - Lint, typecheck and build pass.
 
