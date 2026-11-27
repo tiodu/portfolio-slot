@@ -19,14 +19,14 @@ const SPRINGS = {
   auto:    { k: 260, c: 18 },   // the button pull: quick, deliberate
 };
 
-// Parts for the theme's lever slot. Later slices add a hinged guard.
+// Parts for the theme's lever slot. A guard, if any, is built by the
+// cabinet (it hangs from the body), and follows the lever's travel.
 const KNOBS = {
   ball: () => new THREE.SphereGeometry(0.17, 48, 32),
 };
-const GUARDS = { none: () => {} };
 
-/* The pivot, length and travel are core. The knob and any guard come
-   from the theme's spec; the hub and collar wear the cabinet's finishes. */
+/* The pivot, length and travel are core. The knob comes from the theme's
+   spec; the hub and collar wear the cabinet's finishes. */
 export function createLever({ materials, accent, spec = { knob: 'ball', guard: 'none' } }) {
   const L = CORE.lever.length;
   const pivot = new THREE.Group();
@@ -44,7 +44,6 @@ export function createLever({ materials, accent, spec = { knob: 'ball', guard: '
   }));
   knob.position.y = L;
   arm.add(rod, collar, knob);
-  part(GUARDS, spec.guard, 'lever.guard')({ pivot, arm, materials });
 
   // Generous invisible hit area: thumbs are bigger than the knob.
   const hit = new THREE.Mesh(new THREE.SphereGeometry(0.42, 12, 8), new THREE.MeshBasicMaterial({ visible: false }));

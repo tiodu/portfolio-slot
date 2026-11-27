@@ -226,6 +226,120 @@ export const themes = {
     },
   },
 
+  command: {
+    name: 'command',
+    label: 'Command',
+    scheme: 'dark',
+    themeColor: '#0c0a12',
+    // From docs/cabinet-poc/refs/command-*: chamfered purple armour, lime
+    // edge strips, hazard-stripe plates, a speaker grille, a stepped base
+    // and a hinged shoulder guard over a lime lever. No logos, no characters.
+    cabinet: {
+      envelope: { min: [-1.72, -0.01, -1.1], max: [2.18, 4.02, 1.36] },  // the guard and fin need room
+      body: { width: 3.2, height: 3.4, depth: 1.6, radius: 0.22, fasciaInset: 0.08, fasciaRadius: 0.16, corner: 'chamfer' },
+      top: { shape: 'flat', rise: 0 },
+      finish: { body: { preset: 'satin', color: '#2f1a52' }, fascia: { preset: 'satin', color: '#36205f' } },
+      trim: {
+        style: 'none',
+        bezel: { from: 0.02, to: 0.13, height: 0.05, corner: 'chamfer', finish: { preset: 'satin', color: '#1b1622' } },
+        edges: { segments: [[0.15, 1.1], [2.1, 3.25]], finish: { preset: 'satin', color: 'accent-2' } },
+        grille: { x: 0, y: 0.86, r: 0.27, color: '#1e1729', ring: { preset: 'satin', color: '#2b1f3d' } },
+        plates: [
+          // Front, above the window: the caution plate, hazard stripes, a ridge.
+          { face: 'front', points: [[-1.44, 2.9], [-0.62, 2.9], [-0.46, 3.06], [-0.62, 3.22], [-1.44, 3.22]], finish: { preset: 'satin', color: '#1b1622' } },
+          { face: 'front', points: [[-1.5, 3.3], [-0.35, 3.3], [-0.2, 3.5], [-1.5, 3.5]], depth: 0.03, finish: { preset: 'satin', color: '#ffffff' }, pattern: { colors: ['accent', '#15111a'], period: 0.2 } },
+          { face: 'front', points: [[0.7, 2.92], [1.44, 2.92], [1.44, 3.2], [0.88, 3.2]], depth: 0.03, finish: { preset: 'satin', color: '#ffffff' }, pattern: { colors: ['accent', '#15111a'], period: 0.16 } },
+          { face: 'front', points: [[-0.38, 3.26], [0.5, 3.26], [0.62, 3.44], [-0.18, 3.44]], depth: 0.03, finish: { preset: 'satin', color: '#5a3592' } },
+          // Front, below: lime lines round the grille.
+          { face: 'front', points: [[-0.98, 1.12], [-0.9, 1.12], [-0.42, 0.6], [-0.5, 0.6]], depth: 0.02, finish: { preset: 'satin', color: 'accent-2' } },
+          { face: 'front', points: [[0.9, 1.12], [0.98, 1.12], [0.5, 0.6], [0.42, 0.6]], depth: 0.02, finish: { preset: 'satin', color: 'accent-2' } },
+          { face: 'front', points: [[-0.5, 0.56], [0.5, 0.56], [0.5, 0.6], [-0.5, 0.6]], depth: 0.02, finish: { preset: 'satin', color: 'accent-2' } },
+          // Clamps on the base.
+          { face: 'front', on: 1.32, points: [[-1.25, 0.03], [-0.7, 0.03], [-0.7, 0.17], [-1.25, 0.17]], depth: 0.03, finish: { preset: 'satin', color: '#141118' } },
+          { face: 'front', on: 1.32, points: [[0.7, 0.03], [1.25, 0.03], [1.25, 0.17], [0.7, 0.17]], depth: 0.03, finish: { preset: 'satin', color: '#141118' } },
+          // Left side: an orange slash and a fin above the top.
+          { face: 'left', points: [[0.45, 0.35], [0.15, 0.35], [-0.35, 1.95], [-0.05, 1.95]], finish: { preset: 'satin', color: 'accent' } },
+          { face: 'left', points: [[0.35, 3.1], [-0.35, 3.1], [-0.45, 3.95], [0.2, 3.75]], depth: 0.1, finish: { preset: 'satin', color: '#3a2163' } },
+          { face: 'left', out: 0.1, points: [[0.2, 3.75], [0.35, 3.1], [0.42, 3.1], [0.27, 3.78]], depth: 0.02, finish: { preset: 'satin', color: 'accent-2' } },
+          // Right side, below the lever: a darker armour plate with a lime edge.
+          { face: 'right', points: [[0.55, 0.3], [-0.7, 0.3], [-0.7, 0.95], [-0.2, 1.05], [0.4, 0.95]], depth: 0.05, finish: { preset: 'satin', color: '#36205c' } },
+          { face: 'right', out: 0.05, points: [[0.4, 0.95], [0.5, 0.95], [0.6, 0.35], [0.5, 0.35]], depth: 0.02, finish: { preset: 'satin', color: 'accent-2' } },
+        ],
+      },
+      decals: {
+        font: '"Barlow Condensed", sans-serif', weight: 600, grille: 'none', ink: '#d9d3e6', nameplate: false, print: false,
+        labels: [
+          { text: 'CAUTION', x: -1.0, y: 3.06, size: 0.17, lift: 0.045 },
+          { text: 'EMERGENCY', x: -1.0, y: 0.5, size: 0.15 },
+          { text: 'REEL 01', x: 1.1, y: 0.5, size: 0.15 },
+        ],
+      },
+      lights: { style: 'none', floor: { color: 'accent', width: 6.5, depth: 4, opacity: 0.45 } },
+      base: {
+        style: 'plinth', height: 0.2, overhang: 0.08, front: 1.32, finish: { preset: 'satin', color: '#2c1a4a' },
+        tray: { width: 2.8, height: 0.1, inside: '#140d20' },
+      },
+      indicators: { style: 'led', color: 'accent-2' },
+      lever: {
+        knob: 'ball', color: 'accent-2', finish: { preset: 'satin', color: '#1d1a22' },
+        guard: 'shoulder', guardFinish: { preset: 'satin', color: '#3a2163' }, guardLift: 0.35, guardDepth: [-0.95, -0.36],
+        guardShape: [[-0.05, 0.12], [0.25, 0.28], [0.48, 0.05], [0.52, -0.95], [0.4, -1.25], [0.32, -0.35], [-0.05, -0.28]],
+        guardPanels: [
+          { points: [[0.36, -0.02], [0.45, 0.02], [0.47, -0.78], [0.38, -0.6]], finish: { preset: 'satin', color: 'accent' } },
+          { points: [[0.0, 0.1], [0.24, 0.24], [0.24, 0.18], [0.0, 0.05]], finish: { preset: 'satin', color: 'accent-2' } },
+        ],
+      },
+    },
+    tokens: {
+      'paper': '#0c0a12',
+      'paper-2': '#17121f',
+      'ink': '#ecf2d8',           // pale lime-white: the reel numerals glow like the refs
+      'ink-2': '#a99fc0',
+      'rule': 'rgba(236, 242, 216, 0.16)',
+      'accent': '#ff6a1a',        // hazard orange: focus, payline
+      'accent-ink': '#ffb37a',
+      'accent-2': '#8bdc2f',      // lime edge strips
+      'accent-3': '#ffd84a',
+      'graphite': '#432570',
+      'alu': '#2b2238',
+      'surface-fill': 'radial-gradient(120% 60% at 50% 100%, rgba(255, 106, 26, 0.16), transparent 60%), linear-gradient(180deg, #110d18 0%, #0c0a12 60%, #0a0810 100%)',
+      'panel': 'rgba(16, 12, 22, 0.88)',
+      'panel-filter': 'blur(8px)',
+      'border': '1px solid rgba(139, 220, 47, 0.45)',
+      'radius': '4px',
+      'radius-sm': '2px',
+      'shadow': '0 0 0 1px rgba(255, 106, 26, 0.12), 0 12px 30px rgba(0, 0, 0, 0.5)',
+      'bar-fill': 'rgba(12, 10, 18, 0.86)',
+      'bar-filter': 'blur(8px)',
+      'bar-edge': 'inset 0 -1px 0 rgba(139, 220, 47, 0.4)',
+      'hero-fill': 'rgba(16, 12, 22, 0.9)',
+      'hero-border': 'var(--border)',
+      'hero-filter': 'blur(8px)',
+      'hero-pad': 'var(--s-3)',
+      'button-fill': 'var(--accent)',
+      'button-ink': '#140a04',
+      'button-hover': '#ff8a45',
+      'knob': 'radial-gradient(circle at 35% 30%, #e9ffc9 0 14%, #8bdc2f 45%, #3f7a12 100%)',
+      'display-ink': '#ecf2d8',
+      'glow': 'none',
+      'glow-2': 'none',
+      // Hazard tape above the panel.
+      'ornament': 'repeating-linear-gradient(-45deg, #ff6a1a 0 10px, #15111a 10px 20px) right 3rem top 2.25rem / 9rem 0.6rem no-repeat',
+      'divider': 'repeating-linear-gradient(-45deg, #ff6a1a 0 6px, transparent 6px 12px) 0 50% / 100% 5px no-repeat',
+      'label-mark': '"\\25B6\\00a0" / ""',
+      'font-display': '"Barlow Condensed", "Arial Narrow", system-ui, sans-serif',
+      'font-body': '"Jost", "Futura", system-ui, sans-serif',
+      'font-label': '"Barlow Condensed", "Arial Narrow", system-ui, sans-serif',
+      'font-lead': 'var(--font-body)',
+      'display-weight': '600',
+      'display-scale': '0.9',
+      'display-leading': '0.95',
+      'display-tracking': '0.01em',
+      'quote-style': 'normal',
+      'label-tracking': '0.08em',
+      'label-case': 'uppercase',
+    },
+  },
   aero: {
     name: 'aero',
     label: 'Aero',
