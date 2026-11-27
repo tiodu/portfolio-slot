@@ -1,9 +1,10 @@
 /*
- * Concept: procedural textures, generated once.
- * Every image on the machine is drawn on a <canvas> at start-up: the reel
- * faces, the printed labels, the brushed metal, the shadow. No image
- * downloads, and the reel numerals are set in the same font as the page,
- * which is what lets a reel face turn into the case study hero.
+ * Concept: procedural textures.
+ * Every image on the machine is drawn on a <canvas>: the reel faces, the
+ * printed labels, the brushed metal, the shadow. No image downloads, and
+ * the reel numerals are set in the same font as the page, which is what
+ * lets a reel face turn into the case study hero. They are drawn when a
+ * cabinet is built, so a theme switch draws them again in the new colours.
  */
 import * as THREE from 'three';
 
@@ -16,8 +17,10 @@ export function readColors() {
   };
 }
 
+// The reels are core: the same faces in every theme.
 const DISPLAY = '"Instrument Serif", "Times New Roman", serif';
 const MONO = '"IBM Plex Mono", ui-monospace, monospace';
+export const REEL_FONTS = [`400 1em ${DISPLAY}`, `500 1em ${MONO}`];
 
 function canvas(w, h) {
   const c = document.createElement('canvas');

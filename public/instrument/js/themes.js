@@ -18,6 +18,11 @@
  * - Neon (accent, accent-2) only on large type, rules and ornaments.
  *   Small text uses ink, ink-2 or accent-ink.
  * - Decoration lives in ornament, divider and label-mark, never in markup.
+ *
+ * `cabinet` fills the 3D machine's themeable slots (see DEFAULT_CABINET in
+ * js/machine/cabinet.js for every slot and what it may hold). Colour
+ * names in `finish` are token names. The reel window, reels, lever and
+ * indicator slots are the fixed core and never appear here.
  */
 
 const STORE = 'instrument-theme';
@@ -50,6 +55,17 @@ export const themes = {
     label: 'Instrument',
     scheme: 'light',
     themeColor: '#f1eee8',
+    cabinet: {
+      body: { width: 3.0, height: 3.4, depth: 1.6, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1 },
+      top: { shape: 'flat', rise: 0 },
+      finish: { body: { preset: 'lacquer', color: 'graphite' }, fascia: { preset: 'brushed', color: 'alu' } },
+      trim: { style: 'none' },
+      decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots' },
+      lights: { style: 'none' },
+      base: { style: 'feet', height: 0.07 },
+      indicators: { style: 'led' },
+      lever: { knob: 'ball', guard: 'none' },
+    },
     tokens: {
       // Colour: paper, ink, one signal accent. Graphite and aluminium are the machine.
       'paper': '#f1eee8',
@@ -110,6 +126,17 @@ export const themes = {
     label: 'Vegas',
     scheme: 'dark',
     themeColor: '#120a24',
+    cabinet: {
+      body: { width: 3.0, height: 3.4, depth: 1.6, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1 },
+      top: { shape: 'flat', rise: 0 },
+      finish: { body: { preset: 'lacquer', color: 'graphite' }, fascia: { preset: 'brushed', color: 'alu' } },
+      trim: { style: 'none' },
+      decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots' },
+      lights: { style: 'none' },
+      base: { style: 'feet', height: 0.07 },
+      indicators: { style: 'led' },
+      lever: { knob: 'ball', guard: 'none' },
+    },
     tokens: {
       'paper': '#120a24',
       'paper-2': '#1e1238',
@@ -173,6 +200,17 @@ export const themes = {
     label: 'Aero',
     scheme: 'light',
     themeColor: '#cfe9ff',
+    cabinet: {
+      body: { width: 3.0, height: 3.4, depth: 1.6, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1 },
+      top: { shape: 'flat', rise: 0 },
+      finish: { body: { preset: 'lacquer', color: 'graphite' }, fascia: { preset: 'brushed', color: 'alu' } },
+      trim: { style: 'none' },
+      decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots' },
+      lights: { style: 'none' },
+      base: { style: 'feet', height: 0.07 },
+      indicators: { style: 'led' },
+      lever: { knob: 'ball', guard: 'none' },
+    },
     tokens: {
       'paper': '#f2f9ff',
       'paper-2': '#e1f0fa',
