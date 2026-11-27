@@ -78,7 +78,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
       onStop: (i) => { kickVel += 0.12; onReelStop?.(i); },
     });
     cabinet.group.add(reels.root);
-    lever = createLever({ materials: cabinet.materials, accent: colors.accent, spec: theme.cabinet?.lever });
+    lever = createLever({ materials: cabinet.materials, accent: cabinet.knobColor, spec: theme.cabinet?.lever });
     cabinet.group.add(lever.pivot);
     // Upload every texture now, so the first spin never stalls on the GPU.
     renderer.compile(scene, camera);
@@ -119,7 +119,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
     const s = slotRect && !centred
       ? slotRect
       : { left: size.w * 0.08, top: size.h * 0.1, width: size.w * 0.84, height: size.h * 0.8 };
-    const f = CORE.frame;
+    const f = cabinet.frame;           // each theme is framed to its own envelope
     const dH = f.h / (2 * tanHalf * (s.height * 0.94 / size.h));
     const dW = f.w / (2 * tanHalf * camera.aspect * (s.width * 0.96 / size.w));
     return {
@@ -232,6 +232,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
   // ----------------------------------------------------------------- loop
   let active = false;
   let stopTick = null;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let clock = 0, nextSweep = dur.sweepEvery * 0.4, nextNudge = dur.nudgeEvery, nextHint = dur.hintEvery * 0.6;
   let sweepT = -1;
 
@@ -258,6 +259,8 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
 
     if (reels.update(dt)) moving = true;
     if (lever.update(dt)) moving = true;
+    // The cabinet's own life (a bulb chase, say). Only redraws when it changes.
+    if (cabinet.tick(dt, !reducedMotion.matches)) moving = true;
 
     // Idle life: light across the glass, a shuffle, a nudge at the lever.
     if (idle) {

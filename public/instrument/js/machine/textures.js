@@ -14,6 +14,7 @@ export function readColors() {
   return {
     paper: get('--paper'), ink: get('--ink'), accent: get('--accent'),
     graphite: get('--graphite'), alu: get('--alu'),
+    'accent-2': get('--accent-2'), 'accent-3': get('--accent-3'),
   };
 }
 

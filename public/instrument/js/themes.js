@@ -126,16 +126,47 @@ export const themes = {
     label: 'Vegas',
     scheme: 'dark',
     themeColor: '#120a24',
+    // From docs/cabinet-poc/refs/vegas-*: cream enamel, an arched top with a
+    // bulb ring and a faceted star, neon outlines, a chrome plinth and tray.
     cabinet: {
-      body: { width: 3.0, height: 3.4, depth: 1.6, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1 },
-      top: { shape: 'flat', rise: 0 },
-      finish: { body: { preset: 'lacquer', color: 'graphite' }, fascia: { preset: 'brushed', color: 'alu' } },
-      trim: { style: 'none' },
-      decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots' },
-      lights: { style: 'none' },
-      base: { style: 'feet', height: 0.07 },
-      indicators: { style: 'led' },
-      lever: { knob: 'ball', guard: 'none' },
+      envelope: { min: [-1.68, 0, -0.9], max: [1.68, 4.78, 1.56] },   // taller and deeper than the default
+      body: { width: 3.2, height: 3.08, depth: 1.6, radius: 0.1, fasciaInset: 0.12, fasciaRadius: 0.14 },
+      top: {
+        shape: 'arch', rise: 1.45, depth: 1.6, rim: 0.34, recess: 0.12,
+        rimFinish: { preset: 'enamel', color: '#2a1342' },
+        panel: { rays: 14, base: '#1a0a2e', glow: '#3d1d55', ray: '#8f6a3a', strength: 0.45 },
+        crest: {
+          shape: 'star', y: 0.74, height: 1.56, width: 1.0, waist: 0.24, apex: 0.34,
+          finish: { preset: 'chrome', color: '#e6b04f' },
+          back: { size: 0.56, finish: { preset: 'chrome', color: '#8b45d0' } },
+        },
+      },
+      finish: { body: { preset: 'enamel', color: '#e9dcc4' }, fascia: { preset: 'enamel', color: '#efe5d1' } },
+      trim: {
+        style: 'neon', radius: 0.016, glow: 0.09,
+        tubes: [
+          { path: 'window', offset: 0.03, color: 'accent-2' },
+          { path: 'window', offset: 0.065, color: 'accent' },
+          { path: 'outline', inset: 0.065, color: 'accent' },
+          { path: 'arch', inset: 0.52, span: [0.2, 0.8], z: 'recess', color: 'accent' },
+          { path: 'arch', inset: 0.85, span: [0, 0.33], z: 'recess', color: 'accent-2' },
+          { path: 'arch', inset: 0.85, span: [0.67, 1], z: 'recess', color: 'accent-2' },
+          { path: 'sides', offset: 0.16, color: 'accent' },
+          { path: 'sides', offset: 0.24, color: 'accent-2' },
+        ],
+        bezel: { from: 0.085, to: 0.12, height: 0.03, finish: { preset: 'chrome', color: '#d9d6e0' } },
+      },
+      decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'none', ink: '#3b1d5e', nameplate: false, print: false },
+      lights: {
+        style: 'bulbs', path: 'arch', inset: 0.17, count: 15, size: 0.055, color: 'accent-3', chase: 0.16,
+        floor: { color: 'accent', width: 6, depth: 3.6, opacity: 0.35 },
+      },
+      base: {
+        style: 'plinth', height: 0.12, overhang: 0.06, front: 1.52, finish: { preset: 'chrome', color: '#cfcdd6' },
+        tray: { width: 1.5, height: 0.4, inside: '#120a1c' },
+      },
+      indicators: { style: 'bulbs', size: 0.045, color: 'accent-3' },
+      lever: { knob: 'ball', guard: 'none', color: '#d4202c', finish: { preset: 'chrome', color: '#d9d6e0' } },
     },
     tokens: {
       'paper': '#120a24',

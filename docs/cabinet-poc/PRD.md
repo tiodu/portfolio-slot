@@ -142,6 +142,8 @@ Cut before extending.
 - No test automation. The dev panel numbers and by-hand checks are the gates.
 - Test device: Eduardo's own phone.
 - Models: Opus for slice 1. Sonnet for the rest, except Vegas (slice 3), which moves to Opus if it hits trouble.
+- Slice 2 (Swiss) waits. Vegas went first (slice 3, Opus), because the POC is about rebuilding the cabinet in different styles.
+- Per-theme envelope (slice 3): each theme's `cabinet.envelope` says how much room it needs, and the camera frames each theme to its own envelope. The default is today's, so Instrument does not move.
 
 ## Still open
 
