@@ -68,7 +68,9 @@ export const DEFAULT_CABINET = {
   // Room every themeable part must fit in (the lever and its mount are core
   // and sit outside it). The camera frames it. A theme that needs more says so.
   envelope: { min: [-FIRST.W / 2, 0, -FIRST.D / 2], max: [FIRST.W / 2, FIRST.FEET + FIRST.H, 1.1] },
-  body: { width: FIRST.W, height: FIRST.H, depth: FIRST.D, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1 },
+  // corner: 'round' (radius rounds every edge) or 'chamfer' (radius cuts the
+  // vertical corners at 45 degrees; fasciaRadius chamfers the fascia).
+  body: { width: FIRST.W, height: FIRST.H, depth: FIRST.D, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1, corner: 'round' },
   // 'flat', or 'arch': rise, depth (front to back), rim (band width),
   // recess (how far the panel sits back), panel (sunburst), crest.
   top: { shape: 'flat', rise: 0 },
@@ -76,15 +78,20 @@ export const DEFAULT_CABINET = {
     body: { preset: 'lacquer', color: 'graphite' },
     fascia: { preset: 'brushed', color: 'alu' },
   },
-  // 'none', or 'neon': tubes along named paths, and an optional bezel.
+  // 'none', or 'neon': tubes along named paths. With any style: `bezel`
+  // round the window, `plates` (armour on any face), `edges` (strips on
+  // chamfered corners) and `grille` (a round speaker grille).
   trim: { style: 'none' },
+  // `labels`: extra printed words, [{ text, x, y, size, color, lift }].
   decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots', ink: 'ink', nameplate: true, print: true },
   // 'none', or 'bulbs': instanced along a path, with an optional chase.
   // `floor` adds a coloured glow on the floor under the machine.
   lights: { style: 'none' },
   base: { style: 'feet', height: FIRST.FEET },   // or 'plinth', with a tray
   indicators: { style: 'led' },                  // or 'bulbs'
-  lever: { knob: 'ball', guard: 'none', color: 'accent' },   // optional `finish` for the hub and mount
+  // Optional `finish` for the hub and mount. guard: 'none' or 'shoulder'
+  // (an armour plate over the lever, hinged, that lifts as you pull).
+  lever: { knob: 'ball', guard: 'none', color: 'accent' },
 };
 
 export function resolveSpec(spec = {}) {
@@ -98,6 +105,17 @@ export function part(registry, name, slot) {
 }
 
 export const tint = (colors, name) => colors[name] || name;
+
+function chamferRect(shape, x, y, w, h, c) {
+  shape.moveTo(x + c, y);
+  shape.lineTo(x + w - c, y); shape.lineTo(x + w, y + c);
+  shape.lineTo(x + w, y + h - c); shape.lineTo(x + w - c, y + h);
+  shape.lineTo(x + c, y + h); shape.lineTo(x, y + h - c);
+  shape.lineTo(x, y + c); shape.closePath();
+  return shape;
+}
+const cornered = (corner) => (corner === 'chamfer' ? chamferRect : roundedRect);
+const polygon = (pts) => new THREE.Shape(pts.map(([u, v]) => new THREE.Vector2(u, v)));
 
 function roundedRect(shape, x, y, w, h, r) {
   shape.moveTo(x + r, y);
@@ -129,6 +147,8 @@ const FINISHES = {
   enamel: (color) => new THREE.MeshPhysicalMaterial({
     color, roughness: 0.3, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.12,
   }),
+  // Painted armour: a soft sheen, no clear coat.
+  satin: (color) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.55, metalness: 0.15, clearcoat: 0.25, clearcoatRoughness: 0.5 }),
   // Polished metal. Tinted, it is gold or anodised colour.
   chrome: (color) => new THREE.MeshPhysicalMaterial({ color, metalness: 1, roughness: 0.14 }),
 };
@@ -140,11 +160,11 @@ const finishOf = ({ colors, renderer }, f, slot) => part(FINISHES, f.preset, slo
    the reel window, so any theme can hang neon or bulbs on them. Each path
    gives one or more polylines and the normal of the surface it lies on. */
 const Z = new THREE.Vector3(0, 0, 1), X = new THREE.Vector3(1, 0, 0);
-const planeZ = (spec, at) => ({
+const planeZ = (spec, at) => (typeof at === 'number' ? at : {
   plate: CORE.plateFront + 0.008,
   face: CORE.faceZ + 0.008,
   recess: CORE.faceZ - (spec.top.recess ?? 0) + 0.008,
-})[at];
+}[at]);
 
 function rectPoints(cx, cy, hw, hh, r, z) {
   const pts = [];
@@ -256,10 +276,10 @@ function starGeometry(arms, inner, apex, rot = 0) {
 }
 
 // An extruded shape whose back and front faces land exactly on zBack and zFront.
-function extrudeBetween(shape, zBack, zFront, bevel, curveSegments = 24) {
+function extrudeBetween(shape, zBack, zFront, bevel, curveSegments = 24, bevelSegments = 3) {
   const g = new THREE.ExtrudeGeometry(shape, {
     depth: Math.max(0.001, zFront - zBack - bevel * 2), curveSegments,
-    bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3,
+    bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel, bevelSegments,
   });
   g.translate(0, 0, zBack + bevel);
   return g;
@@ -276,6 +296,16 @@ const ellipseShape = (a, b, steps = 48) => {
 };
 
 const NONE = () => {};
+
+/* A box whose vertical corners are cut at 45 degrees (radius wide) and
+   whose top and bottom edges carry a small flat bevel. Its plan is
+   extruded upwards, then centred like a box. */
+function chamferedBox(b) {
+  const e = 0.04;
+  const plan = chamferRect(new THREE.Shape(), -b.width / 2 + e, -b.depth / 2 + e, b.width - e * 2, b.depth - e * 2, Math.max(0.001, b.radius - e * 0.4));
+  const g = new THREE.ExtrudeGeometry(plan, { depth: b.height - e * 2, bevelEnabled: true, bevelThickness: e, bevelSize: e, bevelSegments: 1 });
+  return g.translate(0, 0, e).rotateX(-Math.PI / 2).translate(0, -b.height / 2, 0);
+}
 
 const CRESTS = {
   none: NONE,
@@ -369,12 +399,90 @@ const TRIMS = {
         group.add(h);
       }
     }
-    if (n.bezel) {
-      const c = CORE, { from, to } = n.bezel;
-      const ring = roundedRect(new THREE.Shape(), -c.winW / 2 - to, c.winY - c.winH / 2 - to, c.winW + to * 2, c.winH + to * 2, 0.05 + to);
-      ring.holes.push(roundedRect(new THREE.Path(), -c.winW / 2 - from, c.winY - c.winH / 2 - from, c.winW + from * 2, c.winH + from * 2, 0.05 + from));
-      group.add(new THREE.Mesh(extrudeBetween(ring, c.plateFront - 0.01, c.plateFront + n.bezel.height, 0.012, 8), finishOf(ctx, n.bezel.finish, 'trim.bezel')));
+  },
+};
+
+/* Trim that any style can carry. */
+const TRIM_EXTRAS = {
+  // A ring round the reel window, rounded or chamfered.
+  bezel(ctx, z) {
+    const c = CORE, { from, to, corner } = z, shape = cornered(corner);
+    const ring = shape(new THREE.Shape(), -c.winW / 2 - to, c.winY - c.winH / 2 - to, c.winW + to * 2, c.winH + to * 2, 0.05 + to);
+    ring.holes.push(roundedRect(new THREE.Path(), -c.winW / 2 - from, c.winY - c.winH / 2 - from, c.winW + from * 2, c.winH + from * 2, 0.05 + from));
+    ctx.group.add(new THREE.Mesh(extrudeBetween(ring, c.plateFront - 0.01, c.plateFront + z.height, 0.012, 8, corner === 'chamfer' ? 1 : 3),
+      finishOf(ctx, z.finish, 'trim.bezel')));
+  },
+  // Armour plates: flat polygons with chamfered edges, laid on a face.
+  // front: points are (x, y), on `on` (a plane name or a z). left / right:
+  // points are (z, y), on the side. top: points are (x, z), on the top.
+  plates(ctx, list) {
+    const { group, spec, colors, renderer } = ctx, b = spec.body;
+    const top = spec.base.height + b.height, mats = new Map();
+    const matFor = (p) => {
+      const key = JSON.stringify([p.finish, p.pattern]);
+      if (!mats.has(key)) {
+        const m = finishOf(ctx, p.finish, 'trim.plates.finish');
+        if (p.pattern) {
+          // Hazard stripes. Extruded caps carry their shape's coordinates as
+          // UVs (world units), so the texture repeats once per stripe period.
+          const [a, z] = p.pattern.colors.map((n) => tint(colors, n));
+          m.map = decal(64, 64, (x, w) => {
+            x.fillStyle = z; x.fillRect(0, 0, w, w);
+            x.fillStyle = a;
+            // A 45 degree band shifts a full tile per tile height, so tiles meet.
+            for (const o of [-w, 0]) { x.beginPath(); x.moveTo(o, w); x.lineTo(o + w / 2, w); x.lineTo(o + w * 1.5, 0); x.lineTo(o + w, 0); x.closePath(); x.fill(); }
+          }, renderer);
+          m.map.wrapS = m.map.wrapT = THREE.RepeatWrapping;
+          m.map.repeat.set(1 / p.pattern.period, 1 / p.pattern.period);
+          m.color.set('#ffffff');
+        }
+        mats.set(key, m);
+      }
+      return mats.get(key);
+    };
+    for (const p of list) {
+      const d = p.depth ?? 0.04, bevel = Math.min(0.015, d / 3);
+      const flip = p.face === 'right' ? p.points.map(([u, v]) => [-u, v]) : p.face === 'top' ? p.points.map(([u, v]) => [u, -v]) : p.points;
+      const g = extrudeBetween(polygon(flip), -0.004, d, bevel, 4, 1);
+      if (p.face === 'right') g.rotateY(Math.PI / 2).translate(b.width / 2 + (p.out ?? 0), 0, 0);
+      else if (p.face === 'left') g.rotateY(-Math.PI / 2).translate(-b.width / 2 - (p.out ?? 0), 0, 0);
+      else if (p.face === 'top') g.rotateX(-Math.PI / 2).translate(0, top + (p.out ?? 0), 0);
+      else g.translate(0, 0, planeZ(spec, p.on ?? 'plate') - 0.008);
+      group.add(new THREE.Mesh(g, matFor(p)));
     }
+  },
+  // Strips on the two front vertical corners, when the body is chamfered.
+  edges(ctx, e) {
+    const { group, spec } = ctx, b = spec.body, c = b.radius, m = finishOf(ctx, e.finish, 'trim.edges.finish');
+    const t = e.thickness ?? 0.03, along = c * Math.SQRT2 * (e.cover ?? 0.6);
+    for (const [y0, y1] of e.segments) {
+      const geo = new THREE.BoxGeometry(along, y1 - y0, t);
+      for (const sx of [-1, 1]) {
+        const s = new THREE.Mesh(geo, m);
+        const n = Math.SQRT1_2 * t / 2;
+        s.position.set(sx * (b.width / 2 - c / 2 + n), spec.base.height + (y0 + y1) / 2, CORE.faceZ - c / 2 + n);
+        s.rotation.y = sx * Math.PI / 4;
+        group.add(s);
+      }
+    }
+  },
+  // A round speaker grille: a dark disc of holes in a raised ring.
+  grille(ctx, g) {
+    const { group, spec, colors, renderer } = ctx, z = planeZ(spec, g.on ?? 'plate');
+    const tex = decal(512, 512, (x, w) => {
+      x.fillStyle = tint(colors, g.color); x.beginPath(); x.arc(w / 2, w / 2, w / 2, 0, Math.PI * 2); x.fill();
+      x.fillStyle = 'rgba(0,0,0,0.85)';
+      const step = w / (g.rows ?? 15);
+      for (let r = 0; r * step < w; r++) for (let q = 0; q * step < w; q++) {
+        const cx = q * step + (r % 2 ? step / 2 : 0) + step / 4, cy = r * step * 0.87 + step / 2;
+        if (Math.hypot(cx - w / 2, cy - w / 2) < w / 2 - step * 0.8) { x.beginPath(); x.arc(cx, cy, step * 0.26, 0, Math.PI * 2); x.fill(); }
+      }
+    }, renderer);
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(g.r, 48), new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 0.6 }));
+    disc.position.set(g.x, g.y, z);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(g.r, 0.025, 8, 48), finishOf(ctx, g.ring, 'trim.grille.ring'));
+    ring.position.set(g.x, g.y, z);
+    group.add(disc, ring);
   },
 };
 
@@ -420,6 +528,26 @@ const LIGHTS = {
         return true;
       },
     };
+  },
+};
+
+/* Guards over the core lever. The guard hangs from a hinge on the body's
+   side and lifts as the lever is pulled (update gets the lever's travel). */
+const GUARDS = {
+  none: () => ({}),
+  shoulder(ctx) {
+    const { group, spec } = ctx, g = spec.lever, b = spec.body;
+    const hinge = new THREE.Group();
+    hinge.position.set(b.width / 2, spec.base.height + b.height - 0.02, 0);
+    // A wedge seen from the front, (x, y) from the hinge, extruded between
+    // two depths behind the lever's travel. Panels sit on its front face.
+    const [z0, z1] = g.guardDepth;
+    hinge.add(new THREE.Mesh(extrudeBetween(polygon(g.guardShape), z0, z1, 0.03, 4, 1), finishOf(ctx, g.guardFinish, 'lever.guardFinish')));
+    for (const p of g.guardPanels ?? []) {
+      hinge.add(new THREE.Mesh(extrudeBetween(polygon(p.points), z1 - 0.01, z1 + 0.025, 0.008, 4, 1), finishOf(ctx, p.finish, 'lever.guardPanels')));
+    }
+    group.add(hinge);
+    return { update(theta) { hinge.rotation.z = Math.max(0, theta) * (g.guardLift ?? 0.35); } };
   },
 };
 
@@ -472,10 +600,10 @@ const BASES = {
 
 const INDICATORS = {
   // A small lamp per slot, lit in the accent colour.
-  led({ group, colors }) {
-    const { xs, y, z } = CORE.indicators;
+  led({ group, spec, colors }) {
+    const { xs, y, z } = CORE.indicators, lit = tint(colors, spec.indicators.color ?? 'accent');
     const off = new THREE.MeshStandardMaterial({ color: '#3a3836', roughness: 0.4 });
-    const on = new THREE.MeshStandardMaterial({ color: colors.accent, emissive: colors.accent, emissiveIntensity: 1.6, roughness: 0.3, toneMapped: false });
+    const on = new THREE.MeshStandardMaterial({ color: lit, emissive: lit, emissiveIntensity: 1.6, roughness: 0.3, toneMapped: false });
     const geo = new THREE.CylinderGeometry(0.034, 0.034, 0.03, 20).rotateX(Math.PI / 2);
     const lamps = xs.map((x) => {
       const m = new THREE.Mesh(geo, off);
@@ -578,6 +706,21 @@ function printDecals({ group, spec, colors, count, renderer }) {
   printMesh.position.set(L.print.x, L.print.y, L.z);
 
   group.add(numbersMesh);
+
+  // Free labels: one small plane each, sized to its text.
+  for (const l of spec.decals.labels ?? []) {
+    const px = 96, pad = 8;
+    const measure = document.createElement('canvas').getContext('2d');
+    measure.font = face(px);
+    const w = Math.ceil(measure.measureText(l.text).width) + pad * 2;
+    const tex = decal(w, px + pad * 2, (x, cw, ch) => {
+      x.font = face(px); x.fillStyle = tint(colors, l.color ?? spec.decals.ink);
+      x.textBaseline = 'middle'; x.fillText(l.text, pad, ch / 2 + px * 0.06);
+    }, renderer);
+    const h = l.size, m = new THREE.Mesh(new THREE.PlaneGeometry(h * w / (px + pad * 2), h), printMat(tex));
+    m.position.set(l.x, l.y, L.z + (l.lift ?? 0));
+    group.add(m);
+  }
   if (spec.decals.nameplate) group.add(name); else disposeAll([name]);
   if (spec.decals.print) group.add(printMesh); else disposeAll([printMesh]);
 }
@@ -596,18 +739,18 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
   // Body: sits on the base, front face on the core's face plane.
   const bodyY = spec.base.height + b.height / 2;
   const bodyZ = c.faceZ - b.depth / 2;
-  const body = new THREE.Mesh(new RoundedBoxGeometry(b.width, b.height, b.depth, 6, b.radius), bodyMat);
+  const body = new THREE.Mesh(b.corner === 'chamfer' ? chamferedBox(b) : new RoundedBoxGeometry(b.width, b.height, b.depth, 6, b.radius), bodyMat);
   body.position.set(0, bodyY, bodyZ);
   group.add(body);
 
   // Fascia with the reel window cut out (an extruded shape with a hole, so
   // the window has real depth). Front face in the fascia finish, edges in the body's.
   const inset = b.fasciaInset + c.bevel;
-  const outer = roundedRect(new THREE.Shape(), -b.width / 2 + inset, -b.height / 2 + inset, b.width - inset * 2, b.height - inset * 2, b.fasciaRadius);
+  const outer = cornered(b.corner)(new THREE.Shape(), -b.width / 2 + inset, -b.height / 2 + inset, b.width - inset * 2, b.height - inset * 2, b.fasciaRadius);
   outer.holes.push(roundedRect(new THREE.Path(), -c.winW / 2 - c.bevel, c.winY - bodyY - c.winH / 2 - c.bevel,
     c.winW + c.bevel * 2, c.winH + c.bevel * 2, 0.05));
   const plate = new THREE.Mesh(new THREE.ExtrudeGeometry(outer, {
-    depth: c.plateDepth, bevelEnabled: true, bevelThickness: c.bevel, bevelSize: c.bevel, bevelSegments: 4, curveSegments: 10,
+    depth: c.plateDepth, bevelEnabled: true, bevelThickness: c.bevel, bevelSize: c.bevel, bevelSegments: b.corner === 'chamfer' ? 1 : 4, curveSegments: 10,
   }), [fasciaMat, bodyMat]);
   plate.position.set(0, bodyY, c.plateBack + c.bevel);
   group.add(plate);
@@ -615,9 +758,11 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
   // Themeable slots.
   part(TOPS, spec.top.shape, 'top')(ctx);
   part(TRIMS, spec.trim.style, 'trim')(ctx);
+  for (const k of ['bezel', 'plates', 'edges', 'grille']) if (spec.trim[k]) TRIM_EXTRAS[k](ctx, spec.trim[k]);
   const lights = part(LIGHTS, spec.lights.style, 'lights')(ctx);
   part(BASES, spec.base.style, 'base')(ctx);
   printDecals(ctx);
+  const guard = part(GUARDS, spec.lever.guard, 'lever.guard')(ctx);
   const indicators = part(INDICATORS, spec.indicators.style, 'indicators')(ctx);
 
   // Check the themeable parts against the envelope before the core joins them.
@@ -625,7 +770,7 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
   const env = spec.envelope, eps = 1e-3;
   const fits = box.min.x >= env.min[0] - eps && box.min.y >= env.min[1] - eps && box.min.z >= env.min[2] - eps
     && box.max.x <= env.max[0] + eps && box.max.y <= env.max[1] + eps && box.max.z <= env.max[2] + eps;
-  if (!fits) console.warn('Cabinet is outside the envelope.', box, env);
+  if (!fits) console.warn(`Cabinet is outside the envelope: min ${box.min.toArray().map((v) => v.toFixed(2))}, max ${box.max.toArray().map((v) => v.toFixed(2))}.`);
   floorGlow(ctx);            // light on the floor, like the contact shadow: not part of the body
 
   // --------------------------------------------------------- fixed core
@@ -698,7 +843,10 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
     fits,
     frame: frameFor(spec.envelope),
     knobColor: tint(colors, spec.lever.color),
-    tick: (dt, live) => lights.tick?.(dt, live) ?? false,
+    tick(dt, live, leverTheta = 0) {
+      guard.update?.(leverTheta);
+      return lights.tick?.(dt, live) ?? false;
+    },
     get led() { return led; },
     setLed(index) { led = index; indicators.set(index); },
     dispose() { disposeAll(own, indicators.materials); },

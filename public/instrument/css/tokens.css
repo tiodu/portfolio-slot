@@ -62,6 +62,16 @@
   src: url("../fonts/open-sans-latin-600-normal.woff2") format("woff2");
   font-weight: 500 600; font-style: normal; font-display: swap;
 }
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("../fonts/barlow-condensed-latin-500-normal.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("../fonts/barlow-condensed-latin-600-normal.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
 
 :root {
   /* Fallback: a copy of themes.instrument.tokens in js/themes.js. Edit there first. */

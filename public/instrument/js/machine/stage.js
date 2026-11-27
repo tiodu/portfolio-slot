@@ -260,7 +260,7 @@ export async function createStage({ mount, slot, studies, onLeverPull, onReelSto
     if (reels.update(dt)) moving = true;
     if (lever.update(dt)) moving = true;
     // The cabinet's own life (a bulb chase, say). Only redraws when it changes.
-    if (cabinet.tick(dt, !reducedMotion.matches)) moving = true;
+    if (cabinet.tick(dt, !reducedMotion.matches, lever.theta)) moving = true;
 
     // Idle life: light across the glass, a shuffle, a nudge at the lever.
     if (idle) {
