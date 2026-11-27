@@ -353,8 +353,8 @@ export const themes = {
       body: { width: 3.2, height: 2.92, depth: 1.6, radius: 0.42, fasciaInset: 0.12, fasciaRadius: 0.3 },
       top: { shape: 'flat', rise: 0 },
       finish: {
-        body: { preset: 'glass', color: '#bfe3fb', opacity: 0.34, rim: { color: '#ffffff', power: 1.4, strength: 1, spec: 0.6 } },
-        fascia: { preset: 'glass', color: '#a8dbff', opacity: 0.4, rim: { color: '#ffffff', power: 2.4, strength: 0.7 } },
+        body: { preset: 'glass', color: '#8fd2f2', opacity: 0.42, rim: { color: '#ffffff', power: 1.4, strength: 1, spec: 0.6 } },
+        fascia: { preset: 'glass', color: '#74c4ea', opacity: 0.48, rim: { color: '#ffffff', power: 2.4, strength: 0.7 } },
       },
       trim: {
         style: 'none',
