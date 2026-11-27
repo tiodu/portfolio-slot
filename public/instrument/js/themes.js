@@ -345,16 +345,33 @@ export const themes = {
     label: 'Aero',
     scheme: 'light',
     themeColor: '#cfe9ff',
+    // From docs/cabinet-poc/refs/aero-*: a rounded glass shell (fake glass:
+    // a thin tint plus a Fresnel rim), a thick chrome window frame, a chrome
+    // band on bun feet with a tray, a green knob, soap bubbles.
     cabinet: {
-      body: { width: 3.0, height: 3.4, depth: 1.6, radius: 0.14, fasciaInset: 0.06, fasciaRadius: 0.1 },
+      envelope: { min: [-1.66, 0, -0.86], max: [1.66, 3.24, 1.34] },
+      body: { width: 3.2, height: 2.92, depth: 1.6, radius: 0.42, fasciaInset: 0.12, fasciaRadius: 0.3 },
       top: { shape: 'flat', rise: 0 },
-      finish: { body: { preset: 'lacquer', color: 'graphite' }, fascia: { preset: 'brushed', color: 'alu' } },
-      trim: { style: 'none' },
-      decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots' },
-      lights: { style: 'none' },
-      base: { style: 'feet', height: 0.07 },
-      indicators: { style: 'led' },
-      lever: { knob: 'ball', guard: 'none' },
+      finish: {
+        body: { preset: 'glass', color: '#8fd2f2', opacity: 0.42, rim: { color: '#ffffff', power: 1.4, strength: 1, spec: 0.6 } },
+        fascia: { preset: 'glass', color: '#74c4ea', opacity: 0.48, rim: { color: '#ffffff', power: 2.4, strength: 0.7 } },
+      },
+      trim: {
+        style: 'none',
+        bezel: { from: 0, to: 0.17, height: 0.09, finish: { preset: 'chrome', color: '#ffffff', env: 3, roughness: 0.24 } },
+      },
+      decals: { font: '"Open Sans", sans-serif', weight: 600, grille: 'none', nameplate: false, print: false },
+      lights: {
+        style: 'none',
+        bubbles: [[-1.95, 3.25, -0.4, 0.3], [2.35, 3.3, -0.6, 0.15], [2.45, 1.95, 0.1, 0.22], [-2.05, 0.8, 0.3, 0.13], [-1.8, 1.7, -0.6, 0.08]],
+      },
+      base: {
+        style: 'plinth', height: 0.3, slab: 0.17, radius: 0.08, overhang: 0.04, front: 1.32, footRadius: 0.17,
+        finish: { preset: 'chrome', color: '#ffffff', env: 3, roughness: 0.24 },
+        tray: { width: 2.3, height: 0.12, inside: '#cfe3f0' },
+      },
+      indicators: { style: 'led', color: 'accent-2' },
+      lever: { knob: 'ball', guard: 'none', color: '#6ccf4a', finish: { preset: 'chrome', color: '#ffffff', env: 3, roughness: 0.24 } },
     },
     tokens: {
       'paper': '#f2f9ff',
