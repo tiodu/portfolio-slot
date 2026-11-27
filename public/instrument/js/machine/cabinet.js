@@ -85,7 +85,8 @@ export const DEFAULT_CABINET = {
   // `labels`: extra printed words, [{ text, x, y, size, color, lift }].
   decals: { font: '"IBM Plex Mono", monospace', weight: 500, grille: 'dots', ink: 'ink', nameplate: true, print: true },
   // 'none', or 'bulbs': instanced along a path, with an optional chase.
-  // `floor` adds a coloured glow on the floor under the machine.
+  // `floor` adds a coloured glow on the floor under the machine, and
+  // `bubbles` ([x, y, z, radius] each) float soap bubbles round it.
   lights: { style: 'none' },
   base: { style: 'feet', height: FIRST.FEET },   // or 'plinth', with a tray
   indicators: { style: 'led' },                  // or 'bulbs'
@@ -149,11 +150,50 @@ const FINISHES = {
   }),
   // Painted armour: a soft sheen, no clear coat.
   satin: (color) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.55, metalness: 0.15, clearcoat: 0.25, clearcoatRoughness: 0.5 }),
+  // Fake glass: a thin transparent tint with a hard clear coat. The edges
+  // come from a Fresnel rim layer (see `rim` on a finish), not transmission.
+  glass: (color) => new THREE.MeshPhysicalMaterial({
+    color, roughness: 0.06, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.4,
+    transparent: true, opacity: 0.3, depthWrite: false,
+  }),
   // Polished metal. Tinted, it is gold or anodised colour.
   chrome: (color) => new THREE.MeshPhysicalMaterial({ color, metalness: 1, roughness: 0.14 }),
 };
 
-const finishOf = ({ colors, renderer }, f, slot) => part(FINISHES, f.preset, slot)(tint(colors, f.color), renderer);
+function finishOf({ colors, renderer }, f, slot) {
+  const m = part(FINISHES, f.preset, slot)(tint(colors, f.color), renderer);
+  if (f.opacity != null) Object.assign(m, { opacity: f.opacity, transparent: true, depthWrite: false });
+  if (f.env != null) m.envMapIntensity = f.env;            // brighter reflections, for chrome on a light page
+  if (f.roughness != null) m.roughness = f.roughness;
+  return m;
+}
+
+/* Concept: a Fresnel rim. Surfaces seen edge-on reflect more light, so
+   glass looks bright at its silhouette and clear face-on. This shader
+   draws only that: alpha rises as the surface turns away from the eye.
+   `film` tints the very edge pink, like a soap film; `spec` adds a hot spot. */
+function rimMaterial(colors, { color, power = 2.5, strength = 0.8, base = 0, spec = 0, film = false }) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(tint(colors, color)) }, uPower: { value: power }, uStrength: { value: strength },
+      uBase: { value: base }, uSpec: { value: spec }, uFilm: { value: film ? 1 : 0 },
+    },
+    vertexShader: `varying vec3 vN; varying vec3 vV;
+      void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uPower, uStrength, uBase, uSpec, uFilm; varying vec3 vN; varying vec3 vV;
+      void main() {
+        vec3 n = normalize(vN), v = normalize(vV);
+        float f = pow(1.0 - abs(dot(n, v)), uPower);
+        vec3 L = normalize(vec3(-0.4, 0.6, 0.7));
+        float s = pow(max(dot(reflect(-L, n), v), 0.0), 60.0) * uSpec;
+        vec3 c = mix(uColor, vec3(1.0, 0.78, 0.95), smoothstep(0.5, 1.0, f) * uFilm * 0.7);
+        float a = clamp(f * uStrength + uBase + s, 0.0, 1.0);
+        gl_FragColor = vec4(c + s, a);
+        #include <colorspace_fragment>
+      }`,
+    transparent: true, depthWrite: false,
+  });
+}
 
 // ------------------------------------------------------------------ paths
 /* Named lines across the cabinet, all derived from the body, the top and
@@ -578,9 +618,20 @@ const BASES = {
     const { group, spec } = ctx, p = spec.base, b = spec.body;
     const metal = finishOf(ctx, p.finish, 'base.finish');
     const back = CORE.faceZ - b.depth - p.overhang, front = p.front;
-    const slab = new THREE.Mesh(new RoundedBoxGeometry(b.width + p.overhang * 2, p.height, front - back, 3, Math.min(0.03, p.height / 2.5)), metal);
-    slab.position.set(0, p.height / 2, (front + back) / 2);
+    // The slab can stand on feet: `slab` is its thickness, the feet fill the rest of `height`.
+    const slabH = p.slab ?? p.height, feetH = p.height - slabH;
+    const slab = new THREE.Mesh(new RoundedBoxGeometry(b.width + p.overhang * 2, slabH, front - back, 4, p.radius ?? Math.min(0.03, slabH / 2.5)), metal);
+    slab.position.set(0, feetH + slabH / 2, (front + back) / 2);
     group.add(slab);
+    if (feetH > 0) {
+      // Flattened balls under the corners.
+      const r = p.footRadius ?? 0.16, geo = new THREE.SphereGeometry(r, 24, 12).scale(1, feetH / (2 * r), 1);
+      for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const f = new THREE.Mesh(geo, metal);
+        f.position.set(sx * (b.width / 2 - r), feetH / 2 + 0.002, sz > 0 ? CORE.faceZ - r : CORE.faceZ - b.depth + r);
+        group.add(f);
+      }
+    }
     if (p.tray) {
       // An open box: walls extruded upwards from a ring, and a dark floor.
       const t = p.tray, zb = CORE.plateFront - 0.06, zf = front - 0.05, d = zf - zb, wall = 0.05;
@@ -742,6 +793,12 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
   const body = new THREE.Mesh(b.corner === 'chamfer' ? chamferedBox(b) : new RoundedBoxGeometry(b.width, b.height, b.depth, 6, b.radius), bodyMat);
   body.position.set(0, bodyY, bodyZ);
   group.add(body);
+  if (spec.finish.body.rim) {
+    const rim = new THREE.Mesh(body.geometry, rimMaterial(colors, spec.finish.body.rim));
+    rim.position.copy(body.position);
+    rim.renderOrder = 3;
+    group.add(rim);
+  }
 
   // Fascia with the reel window cut out (an extruded shape with a hole, so
   // the window has real depth). Front face in the fascia finish, edges in the body's.
@@ -754,6 +811,12 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
   }), [fasciaMat, bodyMat]);
   plate.position.set(0, bodyY, c.plateBack + c.bevel);
   group.add(plate);
+  if (spec.finish.fascia.rim) {
+    const rim = new THREE.Mesh(plate.geometry, rimMaterial(colors, spec.finish.fascia.rim));
+    rim.position.copy(plate.position);
+    rim.renderOrder = 3;
+    group.add(rim);
+  }
 
   // Themeable slots.
   part(TOPS, spec.top.shape, 'top')(ctx);
@@ -772,6 +835,16 @@ export function buildCabinet(renderer, cabinetSpec, colors, count) {
     && box.max.x <= env.max[0] + eps && box.max.y <= env.max[1] + eps && box.max.z <= env.max[2] + eps;
   if (!fits) console.warn(`Cabinet is outside the envelope: min ${box.min.toArray().map((v) => v.toFixed(2))}, max ${box.max.toArray().map((v) => v.toFixed(2))}.`);
   floorGlow(ctx);            // light on the floor, like the contact shadow: not part of the body
+  if (spec.lights.bubbles) {
+    // Soap bubbles floating round the machine: all rim, no body.
+    const mat = rimMaterial(colors, { color: '#e6f6ff', power: 3, strength: 0.95, base: 0, spec: 1, film: true });
+    const geo = new THREE.SphereGeometry(1, 32, 24);
+    for (const [x, y, z, r] of spec.lights.bubbles) {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z); m.scale.setScalar(r); m.renderOrder = 4;
+      group.add(m);
+    }
+  }
 
   // --------------------------------------------------------- fixed core
   // Window interior: dark falloff top and bottom sells the curvature.
